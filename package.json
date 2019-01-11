@@ -1,0 +1,21 @@
+{
+  "name": "functionalts",
+  "version": "0.0.1",
+  "description": "Functional (Haskell style) programming in typescript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "functional",
+    "typescript",
+    "higher",
+    "kinded",
+    "types"
+  ],
+  "author": "Abraham White <abelincoln.white@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^3.2.2"
+  }
+}
