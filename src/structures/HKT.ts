@@ -9,7 +9,11 @@ import { The } from '../util/types'
 /** used on union types to discriminate */
 export const tag = Symbol('functionalts/HKT/tag')
 /** used to discriminate between different higher kinded types */
-export const URI_Tag = Symbol('functionalts/HKT/URI_Tag')
+// Currently with typescript 3.2.2 there are bugs when using
+// computed symbols as keys and interface/module augmentation
+// so we have to fall back to a scoped string
+// TODO: Submit issue
+export const URI_Tag = '@@functionalts/HKT/URI_Tag'
 
 export interface HKT<URI, A> {
   /** A field used to discriminate on first-order HKTs */
@@ -32,7 +36,11 @@ export interface HKT<URI, A> {
 // see https://github.com/gcanti/fp-ts/blob/e31a386c834934862db68f69b0d6039ba12d8b0c/src/HKT.ts
 export interface URI2HKT<A> {}
 
-export type URIS = keyof URI2HKT<any> // URI2HKT<any>[keyof URI2HKT<any>][typeof URI_Tag]
+export type URIS = /*
+  keyof URI2HKT<any>
+  /*/
+  URI2HKT<any>[keyof URI2HKT<any>][typeof URI_Tag]
+  //*/
 
 export type Type<URI extends URIS, A> = URI2HKT<A>[URI]
 

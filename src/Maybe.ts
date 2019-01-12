@@ -1,12 +1,17 @@
 import { HKT, tag, URI_Tag } from './structures/HKT'
-import { addFunctor } from './structures/Functor';
-import { createRegister } from './util/util';
+import { addFunctor } from './structures/Functor'
+import { createRegister } from './util/util'
 
 export const URI = 'functionalts/Maybe/URI'
 export type URI = typeof URI
 
 declare module './structures/HKT' {
   interface URI2HKT<A> {
+    // if we use a computed property name
+    // we get the error 'functionalts/Maybe/URI'
+    // does not satisfy the constraint 'functionalts/Array/URI'
+    // this is a bug as of typescript 3.2.2
+    // TODO: Submit an issue
     'functionalts/Maybe/URI': Maybe<A>
   }
 }

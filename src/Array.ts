@@ -1,19 +1,19 @@
-import { URI_Tag } from "./structures/HKT"
-import { createRegister } from "./util/util"
-import { addFunctor } from "./structures/Functor"
+import { URI_Tag } from './structures/HKT'
+import { createRegister } from './util/util'
+import { addFunctor } from './structures/Functor'
 
 export const URI = 'functionalts/Array/URI'
 export type URI = typeof URI
 
 declare module './structures/HKT' {
   interface URI2HKT<A> {
-    [URI]: Array<A>
+    'functionalts/Array/URI': Array<A>
   }
 }
 
 declare global {
   interface Array<T> {
-    [URI_Tag]: URI
+    [URI_Tag]: 'functionalts/Array/URI'
     _A: T
   }
 }
