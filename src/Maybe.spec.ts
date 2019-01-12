@@ -7,9 +7,12 @@ import { URI_Tag } from './structures/HKT'
 // make sure to clean before
 jest.mock('./structures/Functor')
 
-const justAribitrary = <A extends fc.Arbitrary<any>>(v: A = fc.anything() as A) => v.map(v => just(v))
-const nothingArbitrary = () => fc.anything().map(_v => nothing);
-const maybeArbitrary = <A extends fc.Arbitrary<any>>(v: A = fc.anything() as A) => fc.oneof(justAribitrary(v), nothingArbitrary())
+const justAribitrary = <A extends fc.Arbitrary<any>>(v: A = fc.anything() as A) =>
+  v.map(v => just(v))
+const nothingArbitrary = () =>
+  fc.anything().map(_v => nothing);
+const maybeArbitrary = <A extends fc.Arbitrary<any>>(v: A = fc.anything() as A) =>
+  fc.oneof(justAribitrary(v), nothingArbitrary())
 
 describe('Maybe', () => {
   describe('Typeclasses', () => {
@@ -19,6 +22,7 @@ describe('Maybe', () => {
         fc.assert(fc.property(maybeArbitrary(),
           m => {
             expect(M.map(m, identity)).toEqual(m)
+            expect(M.mapC(identity)(m)).toEqual(m)
           }
         ))
       })
@@ -31,6 +35,11 @@ describe('Maybe', () => {
               M.map(M.map(m, f), g)
             ).toEqual(
               M.map(m, x => g(f(x)))
+            )
+            expect(
+              M.mapC(g)(M.mapC(f)(m))
+            ).toEqual(
+              M.mapC((x: number) => g(f(x)))(m)
             )
           }
         ))

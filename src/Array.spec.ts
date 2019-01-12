@@ -14,6 +14,7 @@ describe('Maybe', () => {
         fc.assert(fc.property(arrayArbitrary(),
           m => {
             expect(M.map(m, identity)).toEqual(m)
+            expect(M.mapC(identity)(m)).toEqual(m)
           }
         ))
       })
@@ -26,6 +27,11 @@ describe('Maybe', () => {
               M.map(M.map(m, f), g)
             ).toEqual(
               M.map(m, x => g(f(x)))
+            )
+            expect(
+              M.mapC(g)(M.mapC(f)(m))
+            ).toEqual(
+              M.mapC((x: number) => g(f(x)))(m)
             )
           }
         ))
