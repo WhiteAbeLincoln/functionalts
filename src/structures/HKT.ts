@@ -14,6 +14,7 @@ export const tag = Symbol('functionalts/HKT/tag')
 // so we have to fall back to a scoped string
 // TODO: Submit issue
 export const URI_Tag = '@@functionalts/HKT/URI_Tag'
+export type URI_Tag = typeof URI_Tag
 
 export interface HKT<URI, A> {
   /** A field used to discriminate on first-order HKTs */
