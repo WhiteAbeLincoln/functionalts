@@ -1,5 +1,8 @@
 import { URI_Tag } from './structures/HKT'
 import { registerInstance } from './structures/register'
+import { Functor1 } from './structures/Functor';
+import { Alt1 } from './structures/Alt';
+import { Plus1 } from './structures/Plus';
 
 declare global {
   interface Array<T> {
@@ -25,6 +28,12 @@ declare module './structures/Functor' {
 
 declare module './structures/Alt' {
   interface URI2Alt<A> {
+    'functionalts/Array/URI': Array<A>
+  }
+}
+
+declare module './structures/Plus' {
+  interface URI2Plus<A> {
     'functionalts/Array/URI': Array<A>
   }
 }
@@ -56,8 +65,20 @@ export const alt = <A>(xs: Array<A>, ys: Array<A>): Array<A> => {
 
 export { alt as concat }
 
-export const Register = () => (modifyPrototype(), registerInstance({
+export const empty: ReadonlyArray<never> = []
+
+// we return a new array instead of the empty constant above
+// just in case someone decides to mutate empty
+// this does mean we don't get object equalit
+// is that important?
+export const zero = <A>(): Array<A> => [] // empty
+
+export const Register = () => (
+  modifyPrototype(),
+  registerInstance<Functor1<URI> & Alt1<URI> & Plus1<URI>>({
     URI
   , map
   , alt
-  }))
+  , zero
+  })
+)

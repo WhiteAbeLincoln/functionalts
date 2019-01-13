@@ -1,5 +1,8 @@
 import { HKT, tag, URI_Tag } from './structures/HKT'
 import { registerInstance } from './structures/register'
+import { Functor1 } from './structures/Functor'
+import { Alt1 } from './structures/Alt'
+import { Plus1 } from './structures/Plus'
 
 export const URI = 'functionalts/Maybe/URI'
 export type URI = typeof URI
@@ -25,6 +28,12 @@ declare module './structures/Functor' {
 
 declare module './structures/Alt' {
   interface URI2Alt<A> {
+    'functionalts/Maybe/URI': Maybe<A>
+  }
+}
+
+declare module './structures/Plus' {
+  interface URI2Plus<A> {
     'functionalts/Maybe/URI': Maybe<A>
   }
 }
@@ -60,6 +69,13 @@ export const map = <A, B>(fa: Maybe<A>, f: (a: A) => B): Maybe<B> =>
 export const alt = <A>(fa: Maybe<A>, fb: Maybe<A>): Maybe<A> =>
   isJust(fa) ? fa : fb
 
+export const zero = <A>(): Maybe<A> => nothing
+
 // This is how you register your object at the value-level
 export const Register = () =>
-  registerInstance({ URI, map, alt })
+  registerInstance<Functor1<URI> & Alt1<URI> & Plus1<URI>>({
+    URI
+  , map
+  , alt
+  , zero
+  })

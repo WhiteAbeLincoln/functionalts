@@ -4,6 +4,7 @@ import * as R from './structures/register'
 import { URI_Tag } from './structures/HKT'
 import { Identity1, Composition1 } from './structures/Functor.helper'
 import { Associativity1, Distributivity1 } from './structures/Alt.helper'
+import { LeftIdentity1, RightIdentity1, Annihilation1 } from './structures/Plus.helper';
 jest.mock('./structures/register')
 
 const arrayArbitrary = <A extends fc.Arbitrary<any>>(v: A = fc.anything() as A) => fc.array(v)
@@ -40,6 +41,24 @@ describe('Maybe', () => {
         // every call should do the same thing, so no need to check anything other than the first
         expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
           [{ URI: M.URI, map: M.map, alt: M.alt }]
+        )
+      })
+    })
+    describe('Plus', () => {
+      it('fulfills the Left Identity law', () => {
+        LeftIdentity1(M, arrayArbitrary())
+      })
+      it('fulfills the Right Identity law', () => {
+        RightIdentity1(M, arrayArbitrary())
+      })
+      it('fulfills the Annihilation law', () => {
+        Annihilation1(M)
+      })
+      it('properly registers itself for use by the plus module', () => {
+        M.Register()
+        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
+        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
+          [{ URI: M.URI, map: M.map, alt: M.alt, zero: M.zero }]
         )
       })
     })
