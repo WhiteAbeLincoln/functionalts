@@ -1,6 +1,5 @@
 import { HKT, tag, URI_Tag } from './structures/HKT'
-import { addFunctor } from './structures/Functor'
-import { createRegister } from './util/util'
+import { registerInstance } from './structures/register'
 
 export const URI = 'functionalts/Maybe/URI'
 export type URI = typeof URI
@@ -12,6 +11,20 @@ declare module './structures/HKT' {
     // does not satisfy the constraint 'functionalts/Array/URI'
     // this is a bug as of typescript 3.2.2
     // TODO: Submit an issue
+    'functionalts/Maybe/URI': Maybe<A>
+  }
+}
+
+// This is how you register your object as a Functor
+// at the type-level
+declare module './structures/Functor' {
+  interface URI2Functor<A> {
+    'functionalts/Maybe/URI': Maybe<A>
+  }
+}
+
+declare module './structures/Alt' {
+  interface URI2Alt<A> {
     'functionalts/Maybe/URI': Maybe<A>
   }
 }
@@ -44,8 +57,9 @@ export const isJust = <A>(m: Maybe<A>): m is Just<A> => m[tag] === TagJust
 export const map = <A, B>(fa: Maybe<A>, f: (a: A) => B): Maybe<B> =>
   isJust(fa) ? just(f(fa.value)) : fa
 
-export const mapC = <A, B>(f: (a: A) => B) => (fa: Maybe<A>): Maybe<B> => map(fa, f)
+export const alt = <A>(fa: Maybe<A>, fb: Maybe<A>): Maybe<A> =>
+  isJust(fa) ? fa : fb
 
-export const Register = createRegister({
-  functor: () => addFunctor({ URI, map, mapC })
-})
+// This is how you register your object at the value-level
+export const Register = () =>
+  registerInstance({ URI, map, alt })

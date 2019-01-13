@@ -1,11 +1,13 @@
 import * as fc from 'fast-check'
 import { just, nothing } from './Maybe'
 import * as M from './Maybe'
-import * as _F from './structures/Functor'
+import * as R from './structures/register'
 import { URI_Tag } from './structures/HKT'
+import { Identity1, Composition1 } from './structures/Functor.helper'
+import { Associativity1, Distributivity1 } from './structures/Alt.helper';
 // Note: Mocking fails when build directory exists
 // make sure to clean before
-jest.mock('./structures/Functor')
+jest.mock('./structures/register')
 
 const justAribitrary = <A extends fc.Arbitrary<any>>(v: A = fc.anything() as A) =>
   v.map(v => just(v))
@@ -18,36 +20,34 @@ describe('Maybe', () => {
   describe('Typeclasses', () => {
     describe('Functor', () => {
       it('fulfills the Identity law', () => {
-        const identity = <A>(x: A) => x
-        fc.assert(fc.property(maybeArbitrary(),
-          m => {
-            expect(M.map(m, identity)).toEqual(m)
-            expect(M.mapC(identity)(m)).toEqual(m)
-          }
-        ))
+        Identity1(M, maybeArbitrary())
       })
       it('fulfills the Composition law', () => {
-        const f = (x: number) => x + 1
-        const g = (x: number) => `${x}`
-        fc.assert(fc.property(maybeArbitrary(fc.integer(Number.MAX_SAFE_INTEGER)),
-          m => {
-            expect(
-              M.map(M.map(m, f), g)
-            ).toEqual(
-              M.map(m, x => g(f(x)))
-            )
-            expect(
-              M.mapC(g)(M.mapC(f)(m))
-            ).toEqual(
-              M.mapC((x: number) => g(f(x)))(m)
-            )
-          }
-        ))
+        Composition1(M, maybeArbitrary(fc.integer(Number.MAX_SAFE_INTEGER)))
       })
-      it('Properly registers itself for use by the functor module', () => {
-        M.Register.functor()
-        expect((_F as jest.Mocked<typeof _F>).addFunctor.mock.calls).toHaveLength(1)
-        expect((_F as jest.Mocked<typeof _F>).addFunctor.mock.calls[0]).toEqual([{ URI: M.URI, map: M.map, mapC: M.mapC }])
+      it('properly registers itself for use by the functor module', () => {
+        M.Register()
+        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
+        // every call should do the same thing, so no need to check anything other than the first
+        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
+          [{ URI: M.URI, map: M.map }]
+        )
+      })
+    })
+    describe('Alt', () => {
+      it('fulfills the Associativity law', () => {
+        Associativity1(M, maybeArbitrary())
+      })
+      it('fulfills the Distributivity law', () => {
+        Distributivity1(M, maybeArbitrary())
+      })
+      it('properly registers itself for use by the alt module', () => {
+        M.Register()
+        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
+        // every call should do the same thing, so no need to check anything other than the first
+        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
+          [{ URI: M.URI, map: M.map, alt: M.alt }]
+        )
       })
     })
   })
