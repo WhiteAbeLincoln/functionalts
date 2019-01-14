@@ -4,7 +4,7 @@ import { getInstance } from './register'
 // type-level dictionaries for Functors
 // allows distinguishing between all HKTs and just those that are functors
 export interface URI2Functor<A> {}
-export type FunctorURIS = URIS & URI2Functor<any>[keyof URI2Functor<any>][typeof URI_Tag]
+export type FunctorURIS = URIS & URI2Functor<any>[keyof URI2Functor<any>][URI_Tag]
 
 export interface Functor<F> {
   readonly URI: F

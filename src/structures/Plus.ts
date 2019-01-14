@@ -2,7 +2,7 @@ import { AltURIS, Alt, Alt1, isAlt } from './Alt'
 import { URI_Tag, HKT, Type } from './HKT'
 
 export interface URI2Plus<A> {}
-export type PlusURIS = AltURIS & URI2Plus<any>[keyof URI2Plus<any>][typeof URI_Tag]
+export type PlusURIS = AltURIS & URI2Plus<any>[keyof URI2Plus<any>][URI_Tag]
 
 export interface Plus<F> extends Alt<F> {
   readonly zero: <A>() => HKT<F, A>

@@ -7,7 +7,7 @@ export interface URI2Alt<A> {}
 // this is a bug in the typescript compiler or language service
 // (caused by the modification of the Array interface),
 // it is safe to ignore and building still works properly
-export type AltURIS = FunctorURIS & URI2Alt<any>[keyof URI2Alt<any>][typeof URI_Tag]
+export type AltURIS = FunctorURIS & URI2Alt<any>[keyof URI2Alt<any>][URI_Tag]
 
 export interface Alt<F> extends Functor<F> {
   readonly alt: <A>(fx: HKT<F, A>, fy: HKT<F, A>) => HKT<F, A>

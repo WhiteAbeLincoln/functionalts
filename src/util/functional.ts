@@ -41,3 +41,6 @@ export const tuple = <Xs extends any[]>(...xs: Xs) => xs
 export const fst = <Ts extends [any, ...any[]]>([v]: Ts) => v
 export const snd = <Ts extends [any, any, ...any[]]>([,v]: Ts) => v
 export const property = <T, K extends keyof T>(k: K) => (o: T) => o[k]
+
+export const gt = (x: number) => (y: number) => x > y
+export const lt = (x: number) => (y: number) => x > y

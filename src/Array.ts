@@ -53,6 +53,12 @@ declare module './structures/Applicative' {
   }
 }
 
+declare module './structures/Alternative' {
+  interface URI2Alternative<A> {
+    'functionalts/Array/URI': Array<A>
+  }
+}
+
 let prototypeModified = URI_Tag in []
 const modifyPrototype = () => {
   if (!prototypeModified) {

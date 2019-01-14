@@ -8,6 +8,8 @@ import * as Alt from './structures/Alt.helper'
 import * as Plus from './structures/Plus.helper'
 import * as Apply from './structures/Apply.helper'
 import * as Applicative from './structures/Applicative.helper'
+import * as Alternative from './structures/Alternative.helper'
+import { lt, gt } from './util/functional'
 // Note: Mocking fails when build directory exists
 // make sure to clean before
 jest.mock('./structures/register')
@@ -74,7 +76,6 @@ describe('Maybe', () => {
     describe('Apply', () => {
       it('fulfills the Composition law', () => {
         const strLen = (x: string) => x.length
-        const gt = (x: number) => (y: number) => x > y
         Apply.Composition1<typeof M['URI'], string, number, boolean>(
           M,
           fc.constant(M.of(strLen)),
@@ -95,12 +96,10 @@ describe('Maybe', () => {
         Applicative.Identity1(M, maybeArbitrary())
       })
       it('fulfills the Homomorphism law', () => {
-        const gt = (x: number) => (y: number) => x > y
         const funcarb = fc.integer().map(gt)
         Applicative.Homomorphism1(M, funcarb, fc.integer())
       })
       it('fulfills the Interchange law', () => {
-        const gt = (x: number) => (y: number) => x > y
         const funcarb = fc.integer().map(gt)
         Applicative.Interchange1(M, funcarb, fc.integer())
       })
@@ -110,6 +109,15 @@ describe('Maybe', () => {
         expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
           [{ URI: M.URI, map: M.map, alt: M.alt, zero: M.zero, ap: M.ap, of: M.of }]
         )
+      })
+    })
+    describe('Alternative', () => {
+      it('fulfills the Distributivity law', () => {
+        const fn = fc.oneof(fc.integer().map(gt), fc.integer().map(lt))
+        Alternative.Distributivity1<typeof M.URI, number, boolean>(M, maybeArbitrary(fc.integer()), maybeArbitrary(fn))
+      })
+      it('fulfills the Annihiliation law', () => {
+        Alternative.Annihilation1(M, maybeArbitrary())
       })
     })
   })

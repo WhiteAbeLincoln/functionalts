@@ -53,6 +53,12 @@ declare module './structures/Applicative' {
   }
 }
 
+declare module './structures/Alternative' {
+  interface URI2Alternative<A> {
+    'functionalts/Maybe/URI': Maybe<A>
+  }
+}
+
 export type Maybe<A> = Nothing | Just<A>
 
 const TagJust = Symbol('functionalts/Maybe/TagJust')

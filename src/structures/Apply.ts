@@ -4,7 +4,7 @@ import { Fn } from '../util/types'
 import { getInstance } from './register'
 
 export interface URI2Apply<A> {}
-export type ApplyURIS = FunctorURIS & URI2Apply<any>[keyof URI2Apply<any>][typeof URI_Tag]
+export type ApplyURIS = FunctorURIS & URI2Apply<any>[keyof URI2Apply<any>][URI_Tag]
 
 export interface Apply<F> extends Functor<F> {
   readonly ap: <A, B>(fab: HKT<F, Fn<[A], B>>, fa: HKT<F, A>) => HKT<F, B>
