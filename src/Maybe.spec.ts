@@ -3,28 +3,30 @@ import { just, nothing } from './Maybe'
 import * as M from './Maybe'
 import * as R from './structures/register'
 import { URI_Tag } from './structures/HKT'
-import { Identity1, Composition1 } from './structures/Functor.helper'
-import { Associativity1, Distributivity1 } from './structures/Alt.helper';
-import { LeftIdentity1, RightIdentity1, Annihilation1 } from './structures/Plus.helper';
+import * as Functor from './structures/Functor.helper'
+import * as Alt from './structures/Alt.helper'
+import * as Plus from './structures/Plus.helper'
+import * as Apply from './structures/Apply.helper'
+import * as Applicative from './structures/Applicative.helper'
 // Note: Mocking fails when build directory exists
 // make sure to clean before
 jest.mock('./structures/register')
 
-const justAribitrary = <A extends fc.Arbitrary<any>>(v: A = fc.anything() as A) =>
+const justAribitrary = <A = any>(v: fc.Arbitrary<A> = fc.anything()) =>
   v.map(v => just(v))
 const nothingArbitrary = () =>
-  fc.anything().map(_v => nothing);
-const maybeArbitrary = <A extends fc.Arbitrary<any>>(v: A = fc.anything() as A) =>
+  fc.constant(nothing)
+const maybeArbitrary = <A = any>(v: fc.Arbitrary<A> = fc.anything()) =>
   fc.oneof(justAribitrary(v), nothingArbitrary())
 
 describe('Maybe', () => {
   describe('Typeclasses', () => {
     describe('Functor', () => {
       it('fulfills the Identity law', () => {
-        Identity1(M, maybeArbitrary())
+        Functor.Identity1(M, maybeArbitrary())
       })
       it('fulfills the Composition law', () => {
-        Composition1(M, maybeArbitrary(fc.integer(Number.MAX_SAFE_INTEGER)))
+        Functor.Composition1(M, maybeArbitrary(fc.integer(Number.MAX_SAFE_INTEGER)))
       })
       it('properly registers itself for use by the functor module', () => {
         M.Register()
@@ -37,10 +39,10 @@ describe('Maybe', () => {
     })
     describe('Alt', () => {
       it('fulfills the Associativity law', () => {
-        Associativity1(M, maybeArbitrary())
+        Alt.Associativity1(M, maybeArbitrary())
       })
       it('fulfills the Distributivity law', () => {
-        Distributivity1(M, maybeArbitrary())
+        Alt.Distributivity1(M, maybeArbitrary())
       })
       it('properly registers itself for use by the alt module', () => {
         M.Register()
@@ -53,19 +55,60 @@ describe('Maybe', () => {
     })
     describe('Plus', () => {
       it('fulfills the Left Identity law', () => {
-        LeftIdentity1(M, maybeArbitrary())
+        Plus.LeftIdentity1(M, maybeArbitrary())
       })
       it('fulfills the Right Identity law', () => {
-        RightIdentity1(M, maybeArbitrary())
+        Plus.RightIdentity1(M, maybeArbitrary())
       })
       it('fulfills the Annihilation law', () => {
-        Annihilation1(M)
+        Plus.Annihilation1(M)
       })
       it('properly registers itself for use by the plus module', () => {
         M.Register()
         expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
         expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
           [{ URI: M.URI, map: M.map, alt: M.alt, zero: M.zero }]
+        )
+      })
+    })
+    describe('Apply', () => {
+      it('fulfills the Composition law', () => {
+        const strLen = (x: string) => x.length
+        const gt = (x: number) => (y: number) => x > y
+        Apply.Composition1<typeof M['URI'], string, number, boolean>(
+          M,
+          fc.constant(M.of(strLen)),
+          maybeArbitrary(fc.nat().map(gt)),
+          maybeArbitrary(fc.string())
+        )
+      })
+      it('properly registers itself for use by the plus module', () => {
+        M.Register()
+        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
+        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
+          [{ URI: M.URI, map: M.map, alt: M.alt, zero: M.zero, ap: M.ap }]
+        )
+      })
+    })
+    describe('Applicative', () => {
+      it('fulfills the Identity law', () => {
+        Applicative.Identity1(M, maybeArbitrary())
+      })
+      it('fulfills the Homomorphism law', () => {
+        const gt = (x: number) => (y: number) => x > y
+        const funcarb = fc.integer().map(gt)
+        Applicative.Homomorphism1(M, funcarb, fc.integer())
+      })
+      it('fulfills the Interchange law', () => {
+        const gt = (x: number) => (y: number) => x > y
+        const funcarb = fc.integer().map(gt)
+        Applicative.Interchange1(M, funcarb, fc.integer())
+      })
+      it('properly registers itself for use by the applicative module', () => {
+        M.Register()
+        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
+        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
+          [{ URI: M.URI, map: M.map, alt: M.alt, zero: M.zero, ap: M.ap, of: M.of }]
         )
       })
     })

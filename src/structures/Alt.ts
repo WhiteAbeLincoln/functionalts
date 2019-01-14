@@ -1,5 +1,5 @@
 import { Functor, Functor1, isFunctor, FunctorURIS } from './Functor'
-import { HKT, URIS, Type, URI_Tag } from './HKT'
+import { HKT, URIS, Type, URI_Tag, getTagValue } from './HKT'
 import { getInstance } from './register'
 
 export interface URI2Alt<A> {}
@@ -21,7 +21,9 @@ export const isAlt = (f: any): f is Alt<any> => {
   return isFunctor(f) && typeof (f as any)['alt'] === 'function'
 }
 
-const getAlt = <F>(f: F): Alt<F> | false | undefined => {
+const getAlt = <F>(f: F | undefined): Alt<F> | false | undefined => {
+  /* istanbul ignore if */
+  if (typeof f === 'undefined') return false
   const inst = getInstance(f)
   return inst && isAlt(inst) && inst
 }
@@ -31,7 +33,7 @@ export function alt<F, A>(fx: HKT<F, A>, fy: HKT<F, A>): HKT<F, A>
 export function alt<F, A>(fx: HKT<F, A>, fy: HKT<F, A>): HKT<F, A> {
   // when recieve a fa value, look up it's HKT tag in the functor table
   // this gives the specific map function that operates on that HKT
-  const tag = fx[URI_Tag]
+  const tag = getTagValue(fx)
   const fmodule = getAlt(tag)
   if (!fmodule) {
     throw new Error(`Alt Module for HKT with tag ${tag} is not registered`)

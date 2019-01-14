@@ -5,6 +5,7 @@ import { Alt1 } from './structures/Alt'
 import { Plus1 } from './structures/Plus'
 import { Apply1 } from './structures/Apply'
 import { Fn } from './util/types'
+import { Applicative1 } from './structures/Applicative'
 
 declare global {
   interface Array<T> {
@@ -46,6 +47,12 @@ declare module './structures/Apply' {
   }
 }
 
+declare module './structures/Applicative' {
+  interface URI2Applicative<A> {
+    'functionalts/Array/URI': Array<A>
+  }
+}
+
 let prototypeModified = URI_Tag in []
 const modifyPrototype = () => {
   if (!prototypeModified) {
@@ -81,70 +88,25 @@ export const empty: ReadonlyArray<never> = []
 // is that important?
 export const zero = <A>(): Array<A> => [] // empty
 
-export const flatten: <A>(ffa: Array<Array<A>>) => Array<A>
-  = Array.prototype.flat
-  ? ffa => ffa.flat(1)
-  : ffa => {
-    // credit to gcanti - from fp-ts
-    // TODO: check if this is significantly faster than concat
-    // return [].concat(...ffa) // should work
-    let rLen = 0
-    const len = ffa.length
-    for (let i = 0; i < len; i++) {
-      rLen += ffa[i].length
-    }
-    const r = Array(rLen)
-    let start = 0
-    for (let i = 0; i < len; i++) {
-      const arr = ffa[i]
-      const l = arr.length
-      for (let j = 0; j < l; j++) {
-        r[j + start] = arr[j]
-      }
-      start += l
-    }
-    return r
-  }
+export const flatten = <A>(ffa: A[][]) => ([] as A[]).concat(...ffa)
 
 export const ap = <A, B>(fab: Array<Fn<[A], B>>, fa: Array<A>): Array<B> => {
   return chain(fab, f => map(fa, f))
 }
 
+export const of = <A>(a: A): A[] => [a]
+
 export const chain: <A, B>(fa: Array<A>, f: (a: A) => Array<B>) => Array<B>
-  = Array.prototype.flatMap
-  ? (fa, f) => fa.flatMap(f)
-  : (fa, f) => {
-    // credit to gcanti - from fp-ts
-    // TODO: check if this is significantly faster than map followed by flatten
-    let resLen = 0
-    const l = fa.length
-    const temp = new Array(l)
-    for (let i = 0; i < l; i++) {
-      const e = fa[i]
-      const arr = f(e)
-      resLen += arr.length
-      temp[i] = arr
-    }
-    const r = Array(resLen)
-    let start = 0
-    for (let i = 0; i < l; i++) {
-      const arr = temp[i]
-      const l = arr.length
-      for (let j = 0; j < l; j++) {
-        r[j + start] = arr[j]
-      }
-      start += l
-    }
-    return r
-  }
+  = <A, B>(fa: Array<A>, f: Fn<[A], Array<B>>) => flatten(fa.map(f))
 
 export const Register = () => (
   modifyPrototype(),
-  registerInstance<Functor1<URI> & Alt1<URI> & Plus1<URI> & Apply1<URI>>({
+  registerInstance<Functor1<URI> & Alt1<URI> & Plus1<URI> & Apply1<URI> & Applicative1<URI>>({
     URI
   , map
   , alt
   , zero
   , ap
+  , of
   })
 )

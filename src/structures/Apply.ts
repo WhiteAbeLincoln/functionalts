@@ -1,7 +1,7 @@
 import { Functor, FunctorURIS, Functor1, isFunctor } from './Functor'
-import { HKT, URI_Tag, Type } from './HKT'
+import { HKT, URI_Tag, Type, getTagValue } from './HKT'
 import { Fn } from '../util/types'
-import { getInstance } from './register';
+import { getInstance } from './register'
 
 export interface URI2Apply<A> {}
 export type ApplyURIS = FunctorURIS & URI2Apply<any>[keyof URI2Apply<any>][typeof URI_Tag]
@@ -18,7 +18,9 @@ export const isApply = (f: any): f is Apply<any> => {
   return isFunctor(f) && typeof (f as any)['ap'] !== 'undefined'
 }
 
-const getApply = <F>(f: F): Apply<F> | false | undefined => {
+const getApply = <F>(f: F | undefined): Apply<F> | false | undefined => {
+  /* istanbul ignore if */
+  if (typeof f === 'undefined') return false
   const inst = getInstance(f)
   // should I be checking twice? I avoid the isFunctor call if inst is undefined
   return inst && isApply(inst) && inst
@@ -27,7 +29,7 @@ const getApply = <F>(f: F): Apply<F> | false | undefined => {
 export function ap<FA extends Type<ApplyURIS, any>, B>(fab: Type<FA[URI_Tag], Fn<[FA['_A']], B>>, fa: FA): Type<FA[URI_Tag], B>
 export function ap<F, A, B>(fab: HKT<F, Fn<[A], B>>, fa: HKT<F, A>): HKT<F, B>
 export function ap<F, A, B>(fab: HKT<F, Fn<[A], B>>, fa: HKT<F, A>): HKT<F, B> {
-  const tag = fab[URI_Tag]
+  const tag = getTagValue(fab)
   const fmodule = getApply(tag)
   if (!fmodule) {
     throw new Error(`Apply Module for HKT with tag ${tag} is not registered`)

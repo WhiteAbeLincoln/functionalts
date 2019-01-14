@@ -1,6 +1,7 @@
 import * as fc from 'fast-check'
 import { PlusURIS, Plus1 } from './Plus'
 import { Type } from './HKT'
+import { id } from '../util/functional'
 
 /**
  * Tests the Right Identity law `P.alt(a, P.zero()) === a`
@@ -39,5 +40,5 @@ export const LeftIdentity1 = <
 export const Annihilation1 = <
   P extends PlusURIS,
 >(P: Plus1<P>) => {
-  expect(P.map(P.zero(), x => x)).toEqual(P.zero())
+  expect(P.map(P.zero(), id)).toEqual(P.zero())
 }

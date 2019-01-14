@@ -2,21 +2,23 @@ import * as fc from 'fast-check'
 import * as M from './Array'
 import * as R from './structures/register'
 import { URI_Tag } from './structures/HKT'
-import { Identity1, Composition1 } from './structures/Functor.helper'
-import { Associativity1, Distributivity1 } from './structures/Alt.helper'
-import { LeftIdentity1, RightIdentity1, Annihilation1 } from './structures/Plus.helper';
+import * as Functor from './structures/Functor.helper'
+import * as Alt from './structures/Alt.helper'
+import * as Plus from './structures/Plus.helper'
+import * as Apply from './structures/Apply.helper'
+import * as Applicative from './structures/Applicative.helper'
 jest.mock('./structures/register')
 
-const arrayArbitrary = <A extends fc.Arbitrary<any>>(v: A = fc.anything() as A) => fc.array(v)
+const arrayArbitrary = <A = any>(v: fc.Arbitrary<A> = fc.anything()) => fc.array(v)
 
 describe('Maybe', () => {
   describe('Typeclasses', () => {
     describe('Functor', () => {
       it('fulfills the Identity law', () => {
-        Identity1(M, arrayArbitrary())
+        Functor.Identity1(M, arrayArbitrary())
       })
       it('fulfills the Composition law', () => {
-        Composition1(M, arrayArbitrary(fc.integer(Number.MAX_SAFE_INTEGER)))
+        Functor.Composition1(M, arrayArbitrary(fc.integer(Number.MAX_SAFE_INTEGER)))
       })
       it('Modifies the Array prototype when registering', () => {
         M.Register()
@@ -30,10 +32,10 @@ describe('Maybe', () => {
     })
     describe('Alt', () => {
       it('fulfills the Associativity law', () => {
-        Associativity1(M, arrayArbitrary())
+        Alt.Associativity1(M, arrayArbitrary())
       })
       it('fulfills the Distributivity law', () => {
-        Distributivity1(M, arrayArbitrary())
+        Alt.Distributivity1(M, arrayArbitrary())
       })
       it('properly registers itself for use by the alt module', () => {
         M.Register()
@@ -46,19 +48,60 @@ describe('Maybe', () => {
     })
     describe('Plus', () => {
       it('fulfills the Left Identity law', () => {
-        LeftIdentity1(M, arrayArbitrary())
+        Plus.LeftIdentity1(M, arrayArbitrary())
       })
       it('fulfills the Right Identity law', () => {
-        RightIdentity1(M, arrayArbitrary())
+        Plus.RightIdentity1(M, arrayArbitrary())
       })
       it('fulfills the Annihilation law', () => {
-        Annihilation1(M)
+        Plus.Annihilation1(M)
       })
       it('properly registers itself for use by the plus module', () => {
         M.Register()
         expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
         expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
           [{ URI: M.URI, map: M.map, alt: M.alt, zero: M.zero }]
+        )
+      })
+    })
+    describe('Apply', () => {
+      it('fulfills the Composition law', () => {
+        const strLen = (x: string) => x.length
+        const gt = (x: number) => (y: number) => x > y
+        Apply.Composition1<typeof M['URI'], string, number, boolean>(
+          M,
+          fc.constant(M.of(strLen)),
+          arrayArbitrary(fc.nat().map(gt)),
+          arrayArbitrary(fc.string())
+        )
+      })
+      it('properly registers itself for use by the plus module', () => {
+        M.Register()
+        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
+        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
+          [{ URI: M.URI, map: M.map, alt: M.alt, zero: M.zero, ap: M.ap }]
+        )
+      })
+    })
+    describe('Applicative', () => {
+      it('fulfills the Identity law', () => {
+        Applicative.Identity1(M, arrayArbitrary())
+      })
+      it('fulfills the Homomorphism law', () => {
+        const gt = (x: number) => (y: number) => x > y
+        const funcarb = fc.integer().map(n => gt(n))
+        Applicative.Homomorphism1(M, funcarb, fc.integer())
+      })
+      it('fulfills the Interchange law', () => {
+        const gt = (x: number) => (y: number) => x > y
+        const funcarb = fc.integer().map(n => gt(n))
+        Applicative.Interchange1(M, funcarb, fc.integer())
+      })
+      it('properly registers itself for use by the applicative module', () => {
+        M.Register()
+        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
+        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
+          [{ URI: M.URI, map: M.map, alt: M.alt, zero: M.zero, ap: M.ap, of: M.of }]
         )
       })
     })

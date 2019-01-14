@@ -1,6 +1,7 @@
 import * as fc from 'fast-check'
 import { Functor1, FunctorURIS } from './Functor'
 import { Type } from './HKT'
+import { id, B } from '../util/functional'
 
 /**
  * Tests the Identity law `F.map(fa, x => x) === fa`
@@ -11,9 +12,8 @@ export const Identity1 = <
   F extends FunctorURIS,
   A extends fc.Arbitrary<Type<F, any>>
 >(F: Functor1<F>, aribtrary: A) => {
-  const identity = <A>(x: A) => x
   fc.assert(fc.property(aribtrary, fa => {
-    expect(F.map(fa, identity)).toEqual(fa)
+    expect(F.map(fa, id)).toEqual(fa)
   }))
 }
 
@@ -32,7 +32,7 @@ export const Composition1 = <
     expect(
       F.map(F.map(fa, f), g)
     ).toEqual(
-      F.map(fa, x => g(f(x)))
+      F.map(fa, B(g)(f))
     )
   }))
 }

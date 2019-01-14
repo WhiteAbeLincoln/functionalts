@@ -16,6 +16,18 @@ export const tag = Symbol('functionalts/HKT/tag')
 export const URI_Tag = '@@functionalts/HKT/URI_Tag'
 export type URI_Tag = typeof URI_Tag
 
+export const getTagValue = <F, A>(fa: HKT<F, A>): F | undefined => {
+  const tag: F | undefined = fa[URI_Tag]
+  return tag
+  // if (typeof tag !== 'undefined') return tag
+  // we have a special case for iterables, since we can't modify
+  // all prototypes conforming to the iterable protocol
+  // if (typeof (fa as any)[Symbol.iterator] === 'function')
+  //   return IterURI as unknown as F
+
+  // return tag
+}
+
 export interface HKT<URI, A> {
   /** A field used to discriminate on first-order HKTs */
   readonly [URI_Tag]: URI

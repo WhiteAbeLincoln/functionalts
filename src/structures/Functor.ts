@@ -1,4 +1,4 @@
-import { HKT, URIS, Type, URI_Tag } from './HKT'
+import { HKT, URIS, Type, URI_Tag, getTagValue } from './HKT'
 import { getInstance } from './register'
 
 // type-level dictionaries for Functors
@@ -25,7 +25,9 @@ export const isFunctor = (f: any): f is Functor<any> => {
   )
 }
 
-const getFunctor = <F>(f: F): Functor<F> | false | undefined => {
+const getFunctor = <F>(f: F | undefined): Functor<F> | false | undefined => {
+  /* istanbul ignore if */
+  if (typeof f === 'undefined') return false
   const inst = getInstance(f)
   // should I be checking twice? I avoid the isFunctor call if inst is undefined
   return inst && isFunctor(inst) && inst
@@ -36,7 +38,7 @@ export function map<F, A, B>(fa: HKT<F, A>, f: (a: A) => B): HKT<F, B>
 export function map<F, A, B>(fa: HKT<F, A>, f: (a: A) => B): HKT<F, B> {
   // when recieve a fa value, look up it's HKT tag in the functor table
   // this gives the specific map function that operates on that HKT
-  const tag = fa[URI_Tag]
+  const tag = getTagValue(fa)
   const fmodule = getFunctor(tag)
   if (!fmodule) {
     throw new Error(`Functor Module for HKT with tag ${tag} is not registered`)

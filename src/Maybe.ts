@@ -5,6 +5,7 @@ import { Alt1 } from './structures/Alt'
 import { Plus1 } from './structures/Plus'
 import { Apply1 } from './structures/Apply'
 import { Fn } from './util/types'
+import { Applicative1 } from './structures/Applicative'
 
 export const URI = 'functionalts/Maybe/URI'
 export type URI = typeof URI
@@ -46,6 +47,12 @@ declare module './structures/Apply' {
   }
 }
 
+declare module './structures/Applicative' {
+  interface URI2Applicative<A> {
+    'functionalts/Maybe/URI': Maybe<A>
+  }
+}
+
 export type Maybe<A> = Nothing | Just<A>
 
 const TagJust = Symbol('functionalts/Maybe/TagJust')
@@ -82,12 +89,15 @@ export const zero = <A>(): Maybe<A> => nothing
 export const ap = <A, B>(fab: Maybe<Fn<[A], B>>, fa: Maybe<A>): Maybe<B> =>
   isNothing(fab) ? nothing : map(fa, fab.value)
 
+export const of = <A>(a: A) => just(a)
+
 // This is how you register your object at the value-level
 export const Register = () =>
-  registerInstance<Functor1<URI> & Alt1<URI> & Plus1<URI> & Apply1<URI>>({
+  registerInstance<Functor1<URI> & Alt1<URI> & Plus1<URI> & Apply1<URI> & Applicative1<URI>>({
     URI
   , map
   , alt
   , zero
   , ap
+  , of
   })

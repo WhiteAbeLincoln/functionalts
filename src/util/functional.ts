@@ -1,23 +1,30 @@
 import { Fn, Curried2 } from './types'
 
 // Combinators
+/** the I combinator, identity */
 export const I = <A>(a: A) => a
+/** the K combinator, const */
 export const K = <A>(a: A) => <B>(_?: B) => a
 // types won't work if we use I instead unless we use a
 // type assertion at the call site because typescript
 // does not have a proper unification algorithm
 // instead we special-case the type here
+/** the A combinator, apply (a special case of I) */
 export const A: <A, B>(f: Fn<[A], B>) => Fn<[A], B> = I
+/** the T combinator, thrush */
 export const T = <A>(a: A) => <B>(fn: Fn<[A], B>) => fn(a)
+/** the W combinator */
 export const W = <A, B>(f: Curried2<A, A, B>) => (x: A) => f(x)(x)
+/** the C combinator, flip */
 export const C =
   <A, B, C>(f: Curried2<A, B, C>) =>
            (b: B) =>
            (a: A) => f(a)(b)
+/** the B combinator, function composition */
 export const B =
-  <A, B, C>(f: Fn<[B], C>) =>
-           (g: Fn<[A], B>) =>
-           (x: A) => f(g(x))
+  <B, C>(f: Fn<[B], C>) =>
+     <A>(g: Fn<[A], B>) =>
+        (x: A) => f(g(x))
 export const S =
   <A, B, C>(f: Curried2<A, B, C>) =>
            (g: Fn<[A], B>) =>
