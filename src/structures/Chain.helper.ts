@@ -6,7 +6,6 @@ import { Fn } from '../util/types'
 /**
  * Tests the Associativity law
  * `F.chain(F.chain(fa, afb), bfc) === F.chain(fa, a => F.chain(afb(a), bfc))`
- * @param A
  */
 export const Associativity1 = <
   F extends ChainURIS,

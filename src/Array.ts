@@ -7,6 +7,7 @@ import { Apply1 } from './structures/Apply'
 import { Fn } from './util/types'
 import { Applicative1 } from './structures/Applicative'
 import { Chain1 } from './structures/Chain'
+import { Monad1 } from './structures/Monad'
 
 declare global {
   interface Array<T> {
@@ -66,6 +67,12 @@ declare module './structures/Chain' {
   }
 }
 
+declare module './structures/Monad' {
+  interface URI2Monad<A> {
+    'functionalts/Array/URI': Array<A>
+  }
+}
+
 let prototypeModified = URI_Tag in []
 const modifyPrototype = () => {
   if (!prototypeModified) {
@@ -118,6 +125,7 @@ type Instances =
   & Apply1<URI>
   & Applicative1<URI>
   & Chain1<URI>
+  & Monad1<URI>
 
 export const Register = () => (
   modifyPrototype(),

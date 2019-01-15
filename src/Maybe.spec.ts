@@ -10,7 +10,17 @@ import * as Apply from './structures/Apply.helper'
 import * as Applicative from './structures/Applicative.helper'
 import * as Alternative from './structures/Alternative.helper'
 import * as Chain from './structures/Chain.helper'
+import * as Monad from './structures/Monad.helper'
 import { lt, gt, B, property, K } from './util/functional'
+import { isChain } from './structures/Chain'
+import { isMonad } from './structures/Monad'
+import { isAlternative } from './structures/Alternative'
+import { isApplicative } from './structures/Applicative'
+import { isPlus } from './structures/Plus'
+import { isApply } from './structures/Apply'
+import { isAlt } from './structures/Alt'
+import { isFunctor } from './structures/Functor'
+import { Predicate } from './util/types'
 // Note: Mocking fails when build directory exists
 // make sure to clean before
 jest.mock('./structures/register')
@@ -22,6 +32,15 @@ const nothingArbitrary = () =>
 const maybeArbitrary = <A = any>(v: fc.Arbitrary<A> = fc.anything()) =>
   fc.oneof(justAribitrary(v), nothingArbitrary())
 
+;(R as jest.Mocked<typeof R>).isTypeclass.mockReturnValue(jest.requireActual('./structures/register').isTypeclass)
+
+const registeredFine = (p: Predicate<any>) => {
+  M.Register()
+  expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
+  const module = (R as jest.Mocked<typeof R>).registerInstance.mock.calls[0][0]
+  expect(p(module)).toBe(true)
+}
+
 describe('Maybe', () => {
   describe('Typeclasses', () => {
     describe('Functor', () => {
@@ -32,12 +51,7 @@ describe('Maybe', () => {
         Functor.Composition1(M, maybeArbitrary(fc.integer(Number.MAX_SAFE_INTEGER)))
       })
       it('properly registers itself for use by the functor module', () => {
-        M.Register()
-        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
-        // every call should do the same thing, so no need to check anything other than the first
-        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
-          [{ URI: M.URI, map: M.map }]
-        )
+        registeredFine(isFunctor)
       })
     })
     describe('Alt', () => {
@@ -48,12 +62,7 @@ describe('Maybe', () => {
         Alt.Distributivity1(M, maybeArbitrary())
       })
       it('properly registers itself for use by the alt module', () => {
-        M.Register()
-        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
-        // every call should do the same thing, so no need to check anything other than the first
-        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
-          [{ URI: M.URI, map: M.map, alt: M.alt }]
-        )
+        registeredFine(isAlt)
       })
     })
     describe('Plus', () => {
@@ -67,11 +76,7 @@ describe('Maybe', () => {
         Plus.Annihilation1(M)
       })
       it('properly registers itself for use by the plus module', () => {
-        M.Register()
-        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
-        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
-          [{ URI: M.URI, map: M.map, alt: M.alt, zero: M.zero }]
-        )
+        registeredFine(isPlus)
       })
     })
     describe('Apply', () => {
@@ -84,12 +89,8 @@ describe('Maybe', () => {
           maybeArbitrary(fc.string())
         )
       })
-      it('properly registers itself for use by the plus module', () => {
-        M.Register()
-        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
-        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
-          [{ URI: M.URI, map: M.map, alt: M.alt, zero: M.zero, ap: M.ap }]
-        )
+      it('properly registers itself for use by the apply module', () => {
+        registeredFine(isApply)
       })
     })
     describe('Applicative', () => {
@@ -105,11 +106,7 @@ describe('Maybe', () => {
         Applicative.Interchange1(M, funcarb, fc.integer())
       })
       it('properly registers itself for use by the applicative module', () => {
-        M.Register()
-        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
-        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
-          [{ URI: M.URI, map: M.map, alt: M.alt, zero: M.zero, ap: M.ap, of: M.of }]
-        )
+        registeredFine(isApplicative)
       })
     })
     describe('Alternative', () => {
@@ -119,6 +116,9 @@ describe('Maybe', () => {
       })
       it('fulfills the Annihiliation law', () => {
         Alternative.Annihilation1(M, maybeArbitrary())
+      })
+      it('properly registers itself for use by the alternative module', () => {
+        registeredFine(isAlternative)
       })
     })
     describe('Chain', () => {
@@ -136,11 +136,23 @@ describe('Maybe', () => {
         )
       })
       it('properly registers itself for use by the chain module', () => {
-        M.Register()
-        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
-        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
-          [{ URI: M.URI, map: M.map, ap: M.ap, chain: M.chain }]
+        registeredFine(isChain)
+      })
+    })
+    describe('Monad', () => {
+      it('fulfills the Left Identity law', () => {
+        const isEven = (x: number) => x % 2 === 0
+        Monad.LeftIdentity1(
+          M, fc.integer(), M.fromPredicate(isEven)
         )
+      })
+      it('fulfills the Right Identity law', () => {
+        Monad.RightIdentity1(
+          M, maybeArbitrary(fc.integer())
+        )
+      })
+      it('properly registers itself for use by the monad module', () => {
+        registeredFine(isMonad)
       })
     })
   })

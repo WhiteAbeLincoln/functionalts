@@ -7,6 +7,7 @@ import { Apply1 } from './structures/Apply'
 import { Fn, Predicate, Refinement, Lazy } from './util/types'
 import { Applicative1 } from './structures/Applicative'
 import { Chain1 } from './structures/Chain'
+import { Monad1 } from './structures/Monad'
 
 export const URI = 'functionalts/Maybe/URI'
 export type URI = typeof URI
@@ -62,6 +63,12 @@ declare module './structures/Alternative' {
 
 declare module './structures/Chain' {
   interface URI2Chain<A> {
+    'functionalts/Maybe/URI': Maybe<A>
+  }
+}
+
+declare module './structures/Monad' {
+  interface URI2Monad<A> {
     'functionalts/Maybe/URI': Maybe<A>
   }
 }
@@ -129,6 +136,7 @@ type Instances =
   & Apply1<URI>
   & Applicative1<URI>
   & Chain1<URI>
+  & Monad1<URI>
 
 // This is how you register your object at the value-level
 export const Register = () =>
