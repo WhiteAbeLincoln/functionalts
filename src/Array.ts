@@ -6,6 +6,7 @@ import { Plus1 } from './structures/Plus'
 import { Apply1 } from './structures/Apply'
 import { Fn } from './util/types'
 import { Applicative1 } from './structures/Applicative'
+import { Chain1 } from './structures/Chain'
 
 declare global {
   interface Array<T> {
@@ -59,6 +60,12 @@ declare module './structures/Alternative' {
   }
 }
 
+declare module './structures/Chain' {
+  interface URI2Chain<A> {
+    'functionalts/Array/URI': Array<A>
+  }
+}
+
 let prototypeModified = URI_Tag in []
 const modifyPrototype = () => {
   if (!prototypeModified) {
@@ -105,14 +112,23 @@ export const of = <A>(a: A): A[] => [a]
 export const chain: <A, B>(fa: Array<A>, f: (a: A) => Array<B>) => Array<B>
   = <A, B>(fa: Array<A>, f: Fn<[A], Array<B>>) => flatten(fa.map(f))
 
+type Instances =
+  & Functor1<URI>
+  & Alt1<URI>
+  & Plus1<URI>
+  & Apply1<URI>
+  & Applicative1<URI>
+  & Chain1<URI>
+
 export const Register = () => (
   modifyPrototype(),
-  registerInstance<Functor1<URI> & Alt1<URI> & Plus1<URI> & Apply1<URI> & Applicative1<URI>>({
+  registerInstance<Instances>({
     URI
   , map
   , alt
   , zero
   , ap
   , of
+  , chain
   })
 )

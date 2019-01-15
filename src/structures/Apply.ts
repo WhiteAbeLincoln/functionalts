@@ -1,7 +1,7 @@
 import { Functor, FunctorURIS, Functor1, isFunctor } from './Functor'
-import { HKT, URI_Tag, Type, getTagValue } from './HKT'
+import { HKT, URI_Tag, Type } from './HKT'
 import { Fn } from '../util/types'
-import { getInstance } from './register'
+import { getTypeclass } from '../util/util'
 
 export interface URI2Apply<A> {}
 export type ApplyURIS = FunctorURIS & URI2Apply<any>[keyof URI2Apply<any>][URI_Tag]
@@ -15,30 +15,26 @@ export interface Apply1<F extends ApplyURIS> extends Functor1<F> {
 }
 
 export const isApply = (f: any): f is Apply<any> => {
-  return isFunctor(f) && typeof (f as any)['ap'] !== 'undefined'
+  return isFunctor(f) && typeof (f as any)['ap'] === 'function'
 }
 
-const getApply = <F>(f: F | undefined): Apply<F> | false | undefined => {
-  /* istanbul ignore if */
-  if (typeof f === 'undefined') return false
-  const inst = getInstance(f)
-  // should I be checking twice? I avoid the isFunctor call if inst is undefined
-  return inst && isApply(inst) && inst
-}
+export const getApply: <F>(fa: HKT<F, any>) => Apply<F> = getTypeclass(isApply, 'Apply')
 
-export function ap<FA extends Type<ApplyURIS, any>, B>(fab: Type<FA[URI_Tag], Fn<[FA['_A']], B>>, fa: FA): Type<FA[URI_Tag], B>
-export function ap<F, A, B>(fab: HKT<F, Fn<[A], B>>, fa: HKT<F, A>): HKT<F, B>
+// If we use Type instead of HKT here, typescript fails to infer. However, since every valid type is an HKT
+// this method works. We must have at least one Type<F> though, otherwise typescript infers too far
+// making our type parameter F become 'Array' | 'Maybe' for invalid calls
+// such as `ap(just((x: string) => x.length), ['hi'])` which gives no error
+export function ap<F extends ApplyURIS, A, B>(fab: HKT<F, Fn<[A], B>>, fa: Type<F, A>): Type<F, B>
 export function ap<F, A, B>(fab: HKT<F, Fn<[A], B>>, fa: HKT<F, A>): HKT<F, B> {
-  const tag = getTagValue(fab)
-  const fmodule = getApply(tag)
-  if (!fmodule) {
-    throw new Error(`Apply Module for HKT with tag ${tag} is not registered`)
-  }
-  return fmodule.ap(fab, fa)
+  return getApply(fab).ap(fab, fa)
 }
 
-export function apC<FA extends Type<ApplyURIS, any>, B>(fab: Type<FA[URI_Tag], Fn<[FA['_A']], B>>): (fa: FA) => Type<FA[URI_Tag], B>
-export function apC<F, A, B>(fab: HKT<F, Fn<[A], B>>): (fa: HKT<F, A>) => HKT<F, B>
+// here we can use HKT for both parameters, since typescript doesn't do any inference
+// past the function boundry - our type parameter F stays restricted to 'Maybe'
+// for the invalid call `ap(just((x: string) => x.length))(['hi'])` giving us an error
+// however, it's not necessary to use HKT for both, so we'll stick with Type, which gives
+// better user ergonomics (vscode shows the actual type name Maybe<string> instead of HKT<'Maybe', string>)
+export function apC<F extends ApplyURIS, A, B>(fab: HKT<F, Fn<[A], B>>): (fa: Type<F, A>) => Type<F, B>
 export function apC<F, A, B>(fab: HKT<F, Fn<[A], B>>): (fa: HKT<F, A>) => HKT<F, B> {
-  return fa => ap(fab, fa)
+  return fa => getApply(fab).ap(fab, fa)
 }

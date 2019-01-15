@@ -7,10 +7,8 @@ describe('Alt', () => {
   it('exports alt and altC functions which call the specific alt for the type', () => {
     const alt = jest.fn()
     const URI = 'TAG'
-    ;(R as jest.Mocked<typeof R>).getInstance.mockReturnValue(
-      { URI, alt, map: alt }
-    )
-
+    const spy = jest.spyOn(A, 'getAlt')
+    spy.mockReturnValue({ URI, alt })
     const fa = { [URI_Tag]: URI } as any
     const fb = { [URI_Tag]: URI } as any
     A.alt(fa, fb)
@@ -18,6 +16,8 @@ describe('Alt', () => {
     // checks if our generic curried version calls the regular map
     expect(alt).toHaveBeenCalledTimes(2)
     expect(alt).toHaveBeenCalledWith(fa, fb)
+
+    spy.mockRestore()
   })
 
   it('throws if a functor instance is not registered for the HKT', () => {

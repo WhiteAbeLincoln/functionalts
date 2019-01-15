@@ -1,5 +1,6 @@
-import { HKT, URIS, Type, URI_Tag, getTagValue } from './HKT'
-import { getInstance } from './register'
+import { HKT, URIS, Type, URI_Tag } from './HKT'
+import { getTypeclass } from '../util/util'
+import { isTypeclass } from './register'
 
 // type-level dictionaries for Functors
 // allows distinguishing between all HKTs and just those that are functors
@@ -16,38 +17,20 @@ export interface Functor1<F extends FunctorURIS> {
   readonly map: <A, B>(fa: Type<F, A>, f: (a: A) => B) => Type<F, B>
 }
 
-export const isFunctor = (f: any): f is Functor<any> => {
-  return (
-       typeof f === 'object'
-    && f !== null
-    && typeof f['URI'] !== 'undefined'
-    && typeof f['map'] === 'function'
-  )
-}
+export const isFunctor = (f: any): f is Functor<any> =>
+  isTypeclass(f) && typeof (f as any)['map'] === 'function'
 
-const getFunctor = <F>(f: F | undefined): Functor<F> | false | undefined => {
-  /* istanbul ignore if */
-  if (typeof f === 'undefined') return false
-  const inst = getInstance(f)
-  // should I be checking twice? I avoid the isFunctor call if inst is undefined
-  return inst && isFunctor(inst) && inst
-}
+export const getFunctor: <F>(fa: HKT<F, any>) => Functor<F> = getTypeclass(isFunctor, 'Functor')
 
-export function map<FA extends Type<FunctorURIS, any>, B>(fa: FA, f: (a: FA['_A']) => B): Type<FA[typeof URI_Tag], B>
-export function map<F, A, B>(fa: HKT<F, A>, f: (a: A) => B): HKT<F, B>
+export function map<FA extends Type<FunctorURIS, any>, B>(fa: FA, f: (a: FA['_A']) => B): Type<FA[URI_Tag], B>
+// export function map<F, A, B>(fa: HKT<F, A>, f: (a: A) => B): HKT<F, B>
 export function map<F, A, B>(fa: HKT<F, A>, f: (a: A) => B): HKT<F, B> {
-  // when recieve a fa value, look up it's HKT tag in the functor table
+  // when receive a fa value, look up it's HKT tag in the functor table
   // this gives the specific map function that operates on that HKT
-  const tag = getTagValue(fa)
-  const fmodule = getFunctor(tag)
-  if (!fmodule) {
-    throw new Error(`Functor Module for HKT with tag ${tag} is not registered`)
-  }
-  return fmodule.map(fa, f)
+  return getFunctor(fa).map(fa, f)
 }
 
-export function mapC<FA extends Type<FunctorURIS, any>, B>(f: (a: FA['_A']) => B): (fa: FA) => Type<FA[typeof URI_Tag], B>
-export function mapC<F, A, B>(f: (a: A) => B): (fa: HKT<F, A>) => HKT<F, B>
-export function mapC<F, A, B>(f: (a: A) => B): (fa: HKT<F, A>) => HKT<F, B> {
-  return fa => map<F, A, B>(fa, f)
+export function mapC<A, B>(f: (a: A) => B): <FA extends Type<FunctorURIS, A>>(fa: FA) => Type<FA[URI_Tag], B>
+export function mapC<A, B>(f: (a: A) => B): (fa: any) => any {
+  return <F>(fa: HKT<F, A>) => getFunctor(fa).map(fa, f)
 }

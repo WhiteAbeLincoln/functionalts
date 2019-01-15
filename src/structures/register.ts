@@ -5,6 +5,10 @@
  */
 const instanceMap = new Map<any, { URI: any, [x: string]: (...args: any) => any }>()
 
+export const isTypeclass = (f: any): f is { URI: any } => {
+  return typeof f === 'object' && f !== null && typeof f['URI'] !== 'undefined'
+}
+
 /**
  * Registers an instance of a Typeclass (is that the correct term?)
  * @param instance the instance
