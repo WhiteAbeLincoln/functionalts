@@ -4,8 +4,9 @@ import { Functor1 } from './structures/Functor'
 import { Alt1 } from './structures/Alt'
 import { Plus1 } from './structures/Plus'
 import { Apply1 } from './structures/Apply'
-import { Fn } from './util/types'
+import { Fn, Predicate, Refinement, Lazy } from './util/types'
 import { Applicative1 } from './structures/Applicative'
+import { Chain1 } from './structures/Chain'
 
 export const URI = 'functionalts/Maybe/URI'
 export type URI = typeof URI
@@ -59,6 +60,12 @@ declare module './structures/Alternative' {
   }
 }
 
+declare module './structures/Chain' {
+  interface URI2Chain<A> {
+    'functionalts/Maybe/URI': Maybe<A>
+  }
+}
+
 export type Maybe<A> = Nothing | Just<A>
 
 const TagJust = Symbol('functionalts/Maybe/TagJust')
@@ -95,15 +102,42 @@ export const zero = <A>(): Maybe<A> => nothing
 export const ap = <A, B>(fab: Maybe<Fn<[A], B>>, fa: Maybe<A>): Maybe<B> =>
   isNothing(fab) ? nothing : map(fa, fab.value)
 
-export const of = <A>(a: A) => just(a)
+export { just as of }
+
+export const chain = <A, B>(fa: Maybe<A>, f: (a: A) => Maybe<B>): Maybe<B> =>
+  isNothing(fa) ? nothing : f(fa.value)
+
+export const fromPredicate =
+  <A, B extends A = A>(pred: Predicate<A> | Refinement<A, B>) =>
+                      (a: A): Maybe<B> => pred(a) ? just(a) : zero()
+
+export const tryCatch = <A>(f: Lazy<A>) => {
+  try {
+    return just(f())
+  } catch {
+    return nothing
+  }
+}
+
+export const fromNullable = <A>(a: A | null | undefined): Maybe<A> =>
+  a == null ? nothing : just(a)
+
+type Instances =
+  & Functor1<URI>
+  & Alt1<URI>
+  & Plus1<URI>
+  & Apply1<URI>
+  & Applicative1<URI>
+  & Chain1<URI>
 
 // This is how you register your object at the value-level
 export const Register = () =>
-  registerInstance<Functor1<URI> & Alt1<URI> & Plus1<URI> & Apply1<URI> & Applicative1<URI>>({
+  registerInstance<Instances>({
     URI
   , map
   , alt
   , zero
   , ap
-  , of
+  , of: just
+  , chain
   })

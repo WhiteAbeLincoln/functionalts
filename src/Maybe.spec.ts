@@ -9,7 +9,8 @@ import * as Plus from './structures/Plus.helper'
 import * as Apply from './structures/Apply.helper'
 import * as Applicative from './structures/Applicative.helper'
 import * as Alternative from './structures/Alternative.helper'
-import { lt, gt } from './util/functional'
+import * as Chain from './structures/Chain.helper'
+import { lt, gt, B, property, K } from './util/functional'
 // Note: Mocking fails when build directory exists
 // make sure to clean before
 jest.mock('./structures/register')
@@ -120,6 +121,28 @@ describe('Maybe', () => {
         Alternative.Annihilation1(M, maybeArbitrary())
       })
     })
+    describe('Chain', () => {
+      it('fulfills the Associativity law', () => {
+        const includes = (x: string) => (y: string) => x.includes(y)
+        Chain.Associativity1(
+          M,
+          maybeArbitrary(fc.string()),
+          // this really isn't necessary to test the law, but its kind of boring
+          // to just pass in a constant
+
+          // tests if a given string contains a character and that strings length is greater than some number
+          fc.char().map(c => M.fromPredicate(includes(c))),
+          fc.nat().map(n => M.fromPredicate(B(gt(n))(property<string, 'length'>('length'))))
+        )
+      })
+      it('properly registers itself for use by the chain module', () => {
+        M.Register()
+        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
+        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
+          [{ URI: M.URI, map: M.map, ap: M.ap, chain: M.chain }]
+        )
+      })
+    })
   })
   describe('Constructors', () => {
     describe('just', () => {
@@ -160,6 +183,33 @@ describe('Maybe', () => {
       })
       it('returns true when given a nothing', () => {
         expect(M.isNothing(nothing)).toBe(true)
+      })
+    })
+  })
+  describe('useful functions', () => {
+    describe('fromPredicate', () => {
+      it('returns a function which returns nothing if the predicate fails', () => {
+        expect(M.fromPredicate(K(false))('hi')).toEqual(nothing)
+      })
+      it('returns a function which returns just the given value if the predicate passes', () => {
+        expect(M.fromPredicate(K(true))('hi')).toEqual(just('hi'))
+      })
+    })
+    describe('tryCatch', () => {
+      it('returns just(return value) if the function does not throw', () => {
+        expect(M.tryCatch(() => 'hi')).toEqual(just('hi'))
+      })
+      it('returns nothing if the function throws', () => {
+        expect(M.tryCatch(() => { throw '' })).toEqual(nothing)
+      })
+    })
+    describe('fromNullable', () => {
+      it('returns nothing if the value is nullable, just(value) otherwise', () => {
+        expect(M.fromNullable(undefined)).toEqual(nothing)
+        expect(M.fromNullable(null)).toEqual(nothing)
+        fc.assert(fc.property(fc.anything().filter(v => v !== null && v !== undefined), a => {
+          expect(M.fromNullable(a)).toEqual(just(a))
+        }))
       })
     })
   })

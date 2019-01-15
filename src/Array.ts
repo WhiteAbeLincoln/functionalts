@@ -109,8 +109,7 @@ export const ap = <A, B>(fab: Array<Fn<[A], B>>, fa: Array<A>): Array<B> => {
 
 export const of = <A>(a: A): A[] => [a]
 
-export const chain: <A, B>(fa: Array<A>, f: (a: A) => Array<B>) => Array<B>
-  = <A, B>(fa: Array<A>, f: Fn<[A], Array<B>>) => flatten(fa.map(f))
+export const chain = <A, B>(fa: Array<A>, f: Fn<[A], Array<B>>): Array<B> => flatten(fa.map(f))
 
 type Instances =
   & Functor1<URI>

@@ -2,6 +2,7 @@ export type The<T, V extends T> = V
 export type Fn<As extends any[], R> = (...args: As) => R
 export type Predicate<A> = Fn<[A], boolean>
 export type Refinement<A, B extends A> = (a: A) => a is B
+export type Lazy<A> = () => A
 
 export type Curried2<A, B, R> = Fn<[A], Fn<[B], R>>
 export type Curried3<A, B, C, R> = Fn<[A], Fn<[B], Fn<[C], R>>>

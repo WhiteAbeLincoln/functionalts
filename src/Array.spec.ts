@@ -8,6 +8,7 @@ import * as Plus from './structures/Plus.helper'
 import * as Apply from './structures/Apply.helper'
 import * as Applicative from './structures/Applicative.helper'
 import * as Alternative from './structures/Alternative.helper'
+import * as Chain from './structures/Chain.helper'
 import { lt, gt } from './util/functional'
 jest.mock('./structures/register')
 
@@ -111,6 +112,25 @@ describe('Maybe', () => {
       })
       it('fulfills the Annihiliation law', () => {
         Alternative.Annihilation1(M, arrayArbitrary())
+      })
+    })
+    describe('Chain', () => {
+      it('fulfills the Associativity law', () => {
+        Chain.Associativity1(
+          M,
+          arrayArbitrary(fc.string()),
+          // this really isn't necessary to test the law, but its kind of boring
+          // to just pass in a constant
+          fc.char().map(c => (x: string) => x.split(c)),
+          fc.constant((x: string) => [x.length])
+        )
+      })
+      it('properly registers itself for use by the chain module', () => {
+        M.Register()
+        expect((R as jest.Mocked<typeof R>).registerInstance).toHaveBeenCalled()
+        expect((R as jest.Mocked<typeof R>).registerInstance.mock.calls[0]).toMatchObject(
+          [{ URI: M.URI, map: M.map, ap: M.ap, chain: M.chain }]
+        )
       })
     })
   })

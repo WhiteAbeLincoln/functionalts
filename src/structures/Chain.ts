@@ -25,7 +25,7 @@ export function chain<F, A, B>(fa: HKT<F, A>, f: (a: A) => HKT<F, B>): HKT<F, B>
   return getChain(fa).chain(fa, f)
 }
 
-export function chainC<F extends ChainURIS, A, B>(f: (a: A) => Type<F, B>): Type<F, B>
+export function chainC<F extends ChainURIS, A, B>(f: (a: A) => Type<F, B>): (fa: Type<F, A>) => Type<F, B>
 export function chainC<F, A, B>(f: (a: A) => HKT<F, B>): (fa: HKT<F, A>) => HKT<F, B> {
   return fa => getChain(fa).chain(fa, f)
 }

@@ -4,7 +4,7 @@ import { Fn, Curried2 } from './types'
 /** the I combinator, identity */
 export const I = <A>(a: A) => a
 /** the K combinator, const */
-export const K = <A>(a: A) => <B>(_?: B) => a
+export const K = <A>(a: A) => <B>(_: B) => a
 // types won't work if we use I instead unless we use a
 // type assertion at the call site because typescript
 // does not have a proper unification algorithm
