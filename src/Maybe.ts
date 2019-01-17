@@ -10,6 +10,7 @@ import { Chain1 } from './structures/Chain'
 import { equals as equalsG, SetoidTypes, Setoid } from './structures/Setoid'
 import { Ord, compare as compareG, OrdTypes } from './structures/Ord'
 import { Ordering } from './structures/Ordering'
+import { Monad1 } from './structures/Monad'
 
 export const URI = 'functionalts/Maybe/URI'
 export type URI = typeof URI
@@ -65,6 +66,12 @@ declare module './structures/Alternative' {
 
 declare module './structures/Chain' {
   interface URI2Chain<A> {
+    'functionalts/Maybe/URI': Maybe<A>
+  }
+}
+
+declare module './structures/Monad' {
+  interface URI2Monad<A> {
     'functionalts/Maybe/URI': Maybe<A>
   }
 }
@@ -191,6 +198,7 @@ type Instances =
   & Apply1<URI>
   & Applicative1<URI>
   & Chain1<URI>
+  & Monad1<URI>
   & Setoid<Maybe<SetoidTypes>>
   & Ord<Maybe<any>>
 

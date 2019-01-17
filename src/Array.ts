@@ -11,6 +11,7 @@ import { equals as equalsG, SetoidTypes, Setoid } from './structures/Setoid'
 import { Ord, compare as compareG, OrdTypes, ordNumber } from './structures/Ord'
 import { Ordering } from './structures/Ordering'
 import { zip } from './Iterable'
+import { Monad1 } from './structures/Monad'
 
 declare global {
   interface Array<T> {
@@ -66,6 +67,12 @@ declare module './structures/Alternative' {
 
 declare module './structures/Chain' {
   interface URI2Chain<A> {
+    'functionalts/Array/URI': Array<A>
+  }
+}
+
+declare module './structures/Monad' {
+  interface URI2Monad<A> {
     'functionalts/Array/URI': Array<A>
   }
 }
@@ -186,6 +193,7 @@ type Instances =
   & Apply1<URI>
   & Applicative1<URI>
   & Chain1<URI>
+  & Monad1<URI>
   & Setoid<Array<SetoidTypes>>
   & Ord<Array<any>>
 
