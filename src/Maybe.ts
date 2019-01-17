@@ -7,6 +7,9 @@ import { Apply1 } from './structures/Apply'
 import { Fn, Predicate, Refinement, Lazy } from './util/types'
 import { Applicative1 } from './structures/Applicative'
 import { Chain1 } from './structures/Chain'
+import { equals as equalsG, SetoidTypes, Setoid } from './structures/Setoid'
+import { Ord, compare as compareG, OrdTypes } from './structures/Ord'
+import { Ordering } from './structures/Ordering'
 
 export const URI = 'functionalts/Maybe/URI'
 export type URI = typeof URI
@@ -66,6 +69,18 @@ declare module './structures/Chain' {
   }
 }
 
+declare module './structures/Setoid' {
+  interface RegisterSetoid {
+    'functionalts/Maybe/Setoid': Maybe<any>
+  }
+}
+
+declare module './structures/Ord' {
+  interface RegisterOrd {
+    'functionalts/Maybe/Ord': Maybe<any>
+  }
+}
+
 export type Maybe<A> = Nothing | Just<A>
 
 const TagJust = Symbol('functionalts/Maybe/TagJust')
@@ -122,6 +137,53 @@ export const tryCatch = <A>(f: Lazy<A>) => {
 export const fromNullable = <A>(a: A | null | undefined): Maybe<A> =>
   a == null ? nothing : just(a)
 
+export const eq = <A>(S: Setoid<A> = { equals: equalsG }) =>
+  (x: Maybe<A>, y: Maybe<A>): boolean =>
+      isNothing(x) ? isNothing(y)
+    : isNothing(y) ? false
+    : S.equals(x.value, y.value)
+
+export const comp =
+   <A>(O: Pick<Ord<A>, 'compare'> = { compare: compareG }) =>
+      (x: Maybe<A>, y: Maybe<A>): Ordering =>
+          isJust(x) ? (isJust(y) ? O.compare(x.value, y.value) : 1)
+        : (isJust(y) ? -1 : 0)
+
+export function equals<A>(S: Setoid<A>): (xs: Maybe<A>, ys: Maybe<A>) => boolean
+export function equals<A extends SetoidTypes>(xs: Maybe<A>, ys: Maybe<A>): boolean
+export function equals(): boolean | (<A>(x: Maybe<A>, y: Maybe<A>) => boolean) {
+  switch (arguments.length) {
+    case 1:
+      const S: Setoid<any> = arguments[0]
+      return eq(S)
+    default:
+      const [xs, ys] = arguments
+      return eq<any>()(xs, ys)
+  }
+}
+
+export function compare<A>(S: Ord<A>): (xs: Maybe<A>, ys: Maybe<A>) => Ordering
+export function compare<A extends OrdTypes>(xs: Maybe<A>, ys: Maybe<A>): Ordering
+export function compare(): Ordering | (<A>(x: Maybe<A>, y: Maybe<A>) => Ordering) {
+  switch (arguments.length) {
+    case 1:
+      const S: Ord<any> = arguments[0]
+      return comp(S)
+    default:
+      const [xs, ys] = arguments
+      return comp<any>()(xs, ys)
+  }
+}
+
+export const getSetoid = <A>(S: Setoid<A>): Setoid<Maybe<A>> => ({
+  equals: eq(S)
+})
+
+export const getOrd = <A>(O: Ord<A>): Ord<Maybe<A>> => ({
+  ...getSetoid(O),
+  compare: comp(O)
+})
+
 type Instances =
   & Functor1<URI>
   & Alt1<URI>
@@ -129,6 +191,8 @@ type Instances =
   & Apply1<URI>
   & Applicative1<URI>
   & Chain1<URI>
+  & Setoid<Maybe<SetoidTypes>>
+  & Ord<Maybe<any>>
 
 // This is how you register your object at the value-level
 export const Register = () =>
@@ -140,4 +204,6 @@ export const Register = () =>
   , ap
   , of: just
   , chain
+  , equals: eq()
+  , compare: comp()
   })

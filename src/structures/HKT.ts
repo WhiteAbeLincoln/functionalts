@@ -35,6 +35,9 @@ export interface HKT<URI, A> {
   readonly _A: A
 }
 
+export const isHKT = (a: any): a is HKT<any, any> =>
+  typeof a === 'object' && a !== null && typeof a[URI_Tag] !== 'undefined'
+
 // I think the proper way to do this would be a mapped type:
 // { [x: symbol]: any }
 // however, as of 3.2.2 typescript cannot use symbols as indexes

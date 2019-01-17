@@ -7,6 +7,10 @@ import { Apply1 } from './structures/Apply'
 import { Fn } from './util/types'
 import { Applicative1 } from './structures/Applicative'
 import { Chain1 } from './structures/Chain'
+import { equals as equalsG, SetoidTypes, Setoid } from './structures/Setoid'
+import { Ord, compare as compareG, OrdTypes, ordNumber } from './structures/Ord'
+import { Ordering } from './structures/Ordering'
+import { zip } from './Iterable'
 
 declare global {
   interface Array<T> {
@@ -66,6 +70,18 @@ declare module './structures/Chain' {
   }
 }
 
+declare module './structures/Setoid' {
+  interface RegisterSetoid {
+    'functionalts/Array/Setoid': Array<any>
+  }
+}
+
+declare module './structures/Ord' {
+  interface RegisterOrd {
+    'functionalts/Array/Ord': Array<any>
+  }
+}
+
 let prototypeModified = URI_Tag in []
 const modifyPrototype = () => {
   if (!prototypeModified) {
@@ -111,6 +127,58 @@ export const of = <A>(a: A): A[] => [a]
 
 export const chain = <A, B>(fa: Array<A>, f: Fn<[A], Array<B>>): Array<B> => flatten(fa.map(f))
 
+const eq =
+ <A>(S: { equals: (x: A, y: A) => boolean } = { equals: equalsG }) =>
+    (xs: Array<A>, ys: Array<A>): boolean =>
+      xs.length === ys.length && xs.every((x, i) => S.equals(x, ys[i]))
+
+export const comp =
+   <A>(O: Pick<Ord<A>, 'compare'> = { compare: compareG }) =>
+      (xs: Array<A>, ys: Array<A>): Ordering => {
+        const xLen = xs.length
+        const yLen = ys.length
+        for (const [x, y] of zip(xs, ys)) {
+          const order = O.compare(x, y)
+          // if the elements are not equal return the result
+          if (order !== 0) return order
+        }
+        // if all matching elements are equal compare lengths
+        return ordNumber.compare(xLen, yLen)
+      }
+
+
+export function equals<A>(S: Setoid<A>): (xs: Array<A>, ys: Array<A>) => boolean
+export function equals<A extends SetoidTypes>(xs: Array<A>, ys: Array<A>): boolean
+export function equals(): boolean | (<A>(x: Array<A>, y: Array<A>) => boolean) {
+  switch (arguments.length) {
+    case 1:
+      const S: Setoid<any> = arguments[0]
+      return eq(S)
+    default:
+      const [xs, ys] = arguments
+      return eq<any>()(xs, ys)
+  }
+}
+
+export function compare<A>(S: Ord<A>): (xs: Array<A>, ys: Array<A>) => Ordering
+export function compare<A extends OrdTypes>(xs: Array<A>, ys: Array<A>): Ordering
+export function compare(): Ordering | (<A>(x: Array<A>, y: Array<A>) => Ordering) {
+  switch (arguments.length) {
+    case 1:
+      const S: Ord<any> = arguments[0]
+      return comp(S)
+    default:
+      const [xs, ys] = arguments
+      return comp<any>()(xs, ys)
+  }
+}
+
+export const getSetoid = <A>(S: Setoid<A>): Setoid<Array<A>> => ({
+  equals: eq(S)
+})
+
+// export const compare = <A extends
+
 type Instances =
   & Functor1<URI>
   & Alt1<URI>
@@ -118,6 +186,8 @@ type Instances =
   & Apply1<URI>
   & Applicative1<URI>
   & Chain1<URI>
+  & Setoid<Array<SetoidTypes>>
+  & Ord<Array<any>>
 
 export const Register = () => (
   modifyPrototype(),
@@ -129,5 +199,7 @@ export const Register = () => (
   , ap
   , of
   , chain
+  , equals: eq()
+  , compare: comp()
   })
 )

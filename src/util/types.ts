@@ -4,6 +4,15 @@ export type Predicate<A> = Fn<[A], boolean>
 export type Refinement<A, B extends A> = (a: A) => a is B
 export type Lazy<A> = () => A
 
+/**
+ * Widen scalar types from literals to their parent types.
+ */
+export type Widen<T> =
+  T extends boolean ? boolean :
+  T extends number ? number :
+  T extends string ? string :
+T;
+
 export type Curried2<A, B, R> = Fn<[A], Fn<[B], R>>
 export type Curried3<A, B, C, R> = Fn<[A], Fn<[B], Fn<[C], R>>>
 export type Curried4<A, B, C, D, R> = Fn<[A], Fn<[B], Fn<[C], Fn<[D], R>>>>

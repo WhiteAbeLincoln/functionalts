@@ -3,7 +3,7 @@
  * Keys are the URIS for an instance, values are records of free functions
  * which operate on the type
  */
-const instanceMap = new Map<any, { URI: any, [x: string]: (...args: any) => any }>()
+const instanceMap: Record<any, { URI: any, [x: string]: (...args: any) => any }> = {}
 
 export const isTypeclass = (f: any): f is { URI: any } => {
   return typeof f === 'object' && f !== null && typeof f['URI'] !== 'undefined'
@@ -20,7 +20,7 @@ export function registerInstance<I extends { URI: any }>(instance: I): void {
   if (typeof URI === 'undefined')
     throw new Error('Attempted to register an instance without a URI')
 
-  instanceMap.set(URI, instance)
+  instanceMap[URI] = instance
 }
 
-export const getInstance = <URI>(uri: URI) => instanceMap.get(uri)
+export const getInstance = <URI>(uri: URI): typeof instanceMap[URI] | undefined => instanceMap[uri]
