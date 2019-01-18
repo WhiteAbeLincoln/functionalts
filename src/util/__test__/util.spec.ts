@@ -1,7 +1,7 @@
-import * as R from '../structures/register'
-import { getTypeclass } from './util'
-import { URI_Tag } from '../structures/HKT'
-jest.mock('../structures/register')
+import * as R from '../../structures/register'
+import { getTypeclass } from '../util'
+import { URI_Tag } from '../../structures/HKT'
+jest.mock('../../structures/register')
 
 describe('getTypeclass', () => {
   it('throws if an instance is not registered', () => {

@@ -1,5 +1,5 @@
-import * as A from './Apply'
-import { URI_Tag } from './HKT'
+import * as A from '../Apply'
+import { URI_Tag } from '../HKT'
 
 describe('Apply', () => {
   it('exports ap and apC functions which call the specific ap for the type', () => {

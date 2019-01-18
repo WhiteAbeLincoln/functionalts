@@ -1,7 +1,7 @@
-jest.mock('./register')
-import * as A from './Alt'
-import { URI_Tag } from './HKT'
-import * as R from './register'
+jest.mock('../register')
+import * as A from '../Alt'
+import { URI_Tag } from '../HKT'
+import * as R from '../register'
 
 describe('Alt', () => {
   it('exports alt and altC functions which call the specific alt for the type', () => {

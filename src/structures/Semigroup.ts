@@ -1,6 +1,7 @@
 import { Type, URIS, URI_Tag, HKT, isHKT } from './HKT'
 import { getTypeclass, iterateObject } from '../util/util'
 import { I } from '../util/functional'
+import { Fn } from '../util/types'
 
 export interface RegisterSemigroup {
   'functionalts/Semigroup/number': number
@@ -50,7 +51,7 @@ export const getRecordSemigroup = <O extends Record<any, any>>(
 
 export const getFunctionSemigroup =
           <S>(S: Semigroup<S>) =>
-  <A = never>(): Semigroup<(a: A) => S> =>
+  <A = never>(): Semigroup<Fn<[A], S>> =>
              ({ concat: (f, g) => a => S.concat(f(a), g(a)) })
 
 export const getDualSemigroup = <A>(S: Semigroup<A>): Semigroup<A> => ({

@@ -1,7 +1,7 @@
-import { AltURIS, Alt1 } from './Alt'
+import { AltURIS, Alt1 } from '../Alt'
 import * as fc from 'fast-check'
-import { Type } from './HKT'
-import { id } from '../util/functional'
+import { Type } from '../HKT'
+import { id } from '../../util/functional'
 
 /**
  * Tests the Associativity law `A.alt(A.alt(a, b), c) === A.alt(a, A.alt(b, c))`

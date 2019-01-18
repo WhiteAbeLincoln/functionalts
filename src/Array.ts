@@ -13,6 +13,7 @@ import { Ordering } from './structures/Ordering'
 import { zip } from './Iterable'
 import { Monad1 } from './structures/Monad'
 import { Semigroup } from './structures/Semigroup'
+import { Monoid } from './structures/Monoid'
 
 declare global {
   interface Array<T> {
@@ -110,7 +111,7 @@ export const map = <A, B>(fa: Array<A>, f: (a: A) => B): Array<B> =>
 export const alt = <A>(xs: Array<A>, ys: Array<A>): Array<A> => xs.concat(ys)
 export { alt as concat }
 
-export const empty: ReadonlyArray<never> = []
+export const empty: Array<never> = []
 
 // we return a new array instead of the empty constant above
 // just in case someone decides to mutate empty
@@ -189,6 +190,7 @@ type Instances =
   & Setoid<Array<SetoidTypes>>
   & Ord<Array<any>>
   & Semigroup<Array<any>>
+  & Monoid<Array<any>>
 
 export const Register = () => (
   modifyPrototype(),
@@ -203,5 +205,6 @@ export const Register = () => (
   , equals: eq()
   , compare: comp()
   , concat: alt
+  , empty
   })
 )

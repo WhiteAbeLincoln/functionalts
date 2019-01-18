@@ -1,7 +1,7 @@
 import * as fc from 'fast-check'
-import { PlusURIS, Plus1 } from './Plus'
-import { Type } from './HKT'
-import { id } from '../util/functional'
+import { PlusURIS, Plus1 } from '../Plus'
+import { Type } from '../HKT'
+import { id } from '../../util/functional'
 
 /**
  * Tests the Right Identity law `P.alt(a, P.zero()) === a`

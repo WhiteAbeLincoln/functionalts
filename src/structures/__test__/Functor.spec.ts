@@ -1,6 +1,6 @@
-import * as F from './Functor'
-import { URI_Tag } from './HKT'
-import { id } from '../util/functional'
+import * as F from '../Functor'
+import { URI_Tag } from '../HKT'
+import { id } from '../../util/functional'
 
 describe('Functor', () => {
   it('exports map and mapC functions which call the specific map for the type', () => {

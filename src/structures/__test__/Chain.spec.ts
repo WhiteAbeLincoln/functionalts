@@ -1,6 +1,6 @@
-import * as F from './Chain'
-import { URI_Tag } from './HKT'
-import { id } from '../util/functional'
+import * as F from '../Chain'
+import { URI_Tag } from '../HKT'
+import { id } from '../../util/functional'
 
 describe('Chain', () => {
   it('exports chain and chainC functions which call the specific chain for the type', () => {

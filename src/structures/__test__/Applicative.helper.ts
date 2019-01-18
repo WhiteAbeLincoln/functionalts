@@ -1,8 +1,8 @@
-import { ApplicativeURIS, Applicative1 } from './Applicative'
+import { ApplicativeURIS, Applicative1 } from '../Applicative'
 import * as fc from 'fast-check'
-import { Type } from './HKT'
-import { id } from '../util/functional'
-import { Fn } from '../util/types'
+import { Type } from '../HKT'
+import { id } from '../../util/functional'
+import { Fn } from '../../util/types'
 
 /**
  * Tests the Identity law `A.ap(A.of(a => a), fa) = fa`

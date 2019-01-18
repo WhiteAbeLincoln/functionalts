@@ -1,7 +1,7 @@
 import * as fc from 'fast-check'
-import { Functor1, FunctorURIS } from './Functor'
-import { Type } from './HKT'
-import { id, B } from '../util/functional'
+import { Functor1, FunctorURIS } from '../Functor'
+import { Type } from '../HKT'
+import { id, B } from '../../util/functional'
 
 /**
  * Tests the Identity law `F.map(fa, x => x) === fa`

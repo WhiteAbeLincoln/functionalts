@@ -1,7 +1,7 @@
-import { ChainURIS, Chain1 } from './Chain'
+import { ChainURIS, Chain1 } from '../Chain'
 import * as fc from 'fast-check'
-import { Type } from './HKT'
-import { Fn } from '../util/types'
+import { Type } from '../HKT'
+import { Fn } from '../../util/types'
 
 /**
  * Tests the Associativity law

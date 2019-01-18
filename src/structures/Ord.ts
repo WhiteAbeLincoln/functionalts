@@ -35,7 +35,7 @@ export const ordBoolean: Ord<boolean> = {
 export const isOrd = (f: any): f is Ord<any> =>
   isSetoid(f) && typeof (f as any)['compare'] === 'function'
 
-export const getOrd = <F extends OrdTypes>(v: F): Ord<F> => {
+export const dispatchOrd = <F extends OrdTypes>(v: F): Ord<F> => {
   if (typeof v === 'string') return ordString as Ord<F>
   if (typeof v === 'number') return ordNumber as Ord<F>
   if (typeof v === 'boolean') return ordBoolean as Ord<F>
@@ -53,13 +53,13 @@ export function compare(): Ordering | (<A>(x: A, y: A) => Ordering) {
     }
     default: {
       const [x, y] = arguments
-      return getOrd(x).compare(x, y)
+      return dispatchOrd(x).compare(x, y)
     }
   }
 }
 
 export const compareC = <A extends OrdTypes>(x: A) => (y: A): Ordering =>
-  getOrd(x).compare(x, y)
+  dispatchOrd(x).compare(x, y)
 
 export const compareC1 = <A>(O: Ord<A>) => (x: A) => (y: A): Ordering =>
   O.compare(x, y)

@@ -1,4 +1,4 @@
-import * as A from './Applicative'
+import * as A from '../Applicative'
 
 describe('Applicative', () => {
   it('plus exports a isApplicative predicate', () => {

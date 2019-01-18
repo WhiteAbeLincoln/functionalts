@@ -1,7 +1,7 @@
 import * as fc from 'fast-check'
-import { ApplyURIS, Apply1 } from './Apply'
-import { Type } from './HKT'
-import { Fn } from '../util/types'
+import { ApplyURIS, Apply1 } from '../Apply'
+import { Type } from '../HKT'
+import { Fn } from '../../util/types'
 
 /**
  * Tests the Composition law

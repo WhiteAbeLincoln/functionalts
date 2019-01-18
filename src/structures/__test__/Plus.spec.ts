@@ -1,4 +1,4 @@
-import * as P from './Plus'
+import * as P from '../Plus'
 
 describe('Plus', () => {
   it('plus exports a isPlus predicate', () => {

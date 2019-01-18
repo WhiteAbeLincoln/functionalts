@@ -1,7 +1,7 @@
 import * as fc from 'fast-check'
-import { MonadURIS, Monad1 } from './Monad'
-import { Type } from './HKT'
-import { Fn } from '../util/types'
+import { MonadURIS, Monad1 } from '../Monad'
+import { Type } from '../HKT'
+import { Fn } from '../../util/types'
 
 /**
  * Tests the Left Identity law `M.chain(M.of(a), f) === f(a)`

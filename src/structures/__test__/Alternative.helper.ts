@@ -1,7 +1,7 @@
-import { AlternativeURIS, Alternative1 } from './Alternative'
+import { AlternativeURIS, Alternative1 } from '../Alternative'
 import * as fc from 'fast-check'
-import { Type } from './HKT'
-import { Fn } from '../util/types'
+import { Type } from '../HKT'
+import { Fn } from '../../util/types'
 
 /**
  * Tests the Distributivity law

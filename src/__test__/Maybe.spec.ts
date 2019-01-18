@@ -1,29 +1,37 @@
 import * as fc from 'fast-check'
-import { just, nothing } from './Maybe'
-import * as M from './Maybe'
-import * as R from './structures/register'
-import { URI_Tag } from './structures/HKT'
-import * as Functor from './structures/Functor.helper'
-import * as Alt from './structures/Alt.helper'
-import * as Plus from './structures/Plus.helper'
-import * as Apply from './structures/Apply.helper'
-import * as Applicative from './structures/Applicative.helper'
-import * as Alternative from './structures/Alternative.helper'
-import * as Chain from './structures/Chain.helper'
-import * as Monad from './structures/Monad.helper'
-import { lt, gt, B, property, K } from './util/functional'
-import { isChain } from './structures/Chain'
-import { isMonad } from './structures/Monad'
-import { isAlternative } from './structures/Alternative'
-import { isApplicative } from './structures/Applicative'
-import { isPlus } from './structures/Plus'
-import { isApply } from './structures/Apply'
-import { isAlt } from './structures/Alt'
-import { isFunctor } from './structures/Functor'
-import { Predicate } from './util/types'
+import { just, nothing } from '../Maybe'
+import * as M from '../Maybe'
+import * as R from '../structures/register'
+import { URI_Tag } from '../structures/HKT'
+import * as Functor from '../structures/__test__/Functor.helper'
+import * as Alt from '../structures/__test__/Alt.helper'
+import * as Plus from '../structures/__test__/Plus.helper'
+import * as Apply from '../structures/__test__/Apply.helper'
+import * as Applicative from '../structures/__test__/Applicative.helper'
+import * as Alternative from '../structures/__test__/Alternative.helper'
+import * as Chain from '../structures/__test__/Chain.helper'
+import * as Monad from '../structures/__test__/Monad.helper'
+import * as Semigroup from '../structures/__test__/Semigroup.helper'
+import * as Monoid from '../structures/__test__/Monoid.helper'
+import * as Setoid from '../structures/__test__/Setoid.helper'
+import * as Ord from '../structures/__test__/Ord.helper'
+import { lt, gt, B, property, K } from '../util/functional'
+import { isChain } from '../structures/Chain'
+import { isMonad } from '../structures/Monad'
+import { isAlternative } from '../structures/Alternative'
+import { isApplicative } from '../structures/Applicative'
+import { isPlus } from '../structures/Plus'
+import { isApply } from '../structures/Apply'
+import { isAlt } from '../structures/Alt'
+import { isFunctor } from '../structures/Functor'
+import { Predicate } from '../util/types'
+import { isSemigroup } from '../structures/Semigroup'
+import { isMonoid } from '../structures/Monoid'
+import { isSetoid } from '../structures/Setoid'
+import { isOrd } from '../structures/Ord'
 // Note: Mocking fails when build directory exists
 // make sure to clean before
-jest.mock('./structures/register')
+jest.mock('../structures/register')
 
 const justAribitrary = <A = any>(v: fc.Arbitrary<A> = fc.anything()) =>
   v.map(v => just(v))
@@ -32,7 +40,7 @@ const nothingArbitrary = () =>
 const maybeArbitrary = <A = any>(v: fc.Arbitrary<A> = fc.anything()) =>
   fc.oneof(justAribitrary(v), nothingArbitrary())
 
-;(R as jest.Mocked<typeof R>).isTypeclass.mockReturnValue(jest.requireActual('./structures/register').isTypeclass)
+;(R as jest.Mocked<typeof R>).isTypeclass.mockReturnValue(jest.requireActual('../structures/register').isTypeclass)
 
 const registeredFine = (p: Predicate<any>) => {
   M.Register()
@@ -153,6 +161,59 @@ describe('Maybe', () => {
       })
       it('properly registers itself for use by the monad module', () => {
         registeredFine(isMonad)
+      })
+    })
+    describe('Semigroup', () => {
+      it('fulfills the Associativity law', () => {
+        Semigroup.Assoiciativity(M, maybeArbitrary())
+      })
+      it('properly registers itself for use by the semigroup module', () => {
+        registeredFine(isSemigroup)
+      })
+    })
+    describe('Monoid', () => {
+      it('fulfills the Left Identity law', () => {
+        Monoid.LeftIdentity(M, maybeArbitrary())
+      })
+      it('fulfills the Right Identity law', () => {
+        Monoid.RightIdentity(M, maybeArbitrary())
+      })
+      it('properly registers itself for use by the monoid module', () => {
+        registeredFine(isMonoid)
+      })
+    })
+    describe('Setoid', () => {
+      it('fulfills the Reflexivity law', () => {
+        // we have to use values that are registered as Setoid types
+        // since the default maybe equals does not take a Setoid but dispatches to find one
+        Setoid.Reflexivity(M, fc.oneof<any>(maybeArbitrary(fc.integer()), maybeArbitrary(fc.string()), maybeArbitrary(fc.boolean())))
+      })
+      it('fulfills the Symmetry law', () => {
+        // we pass in an array instead of doing oneof because oneof may generate comparisons of Maybe<A> vs Maybe<B> when used in fc.tuple
+        Setoid.Symmetry(M, [maybeArbitrary(fc.integer()), maybeArbitrary(fc.string()), maybeArbitrary(fc.boolean())] as any[])
+      })
+      it('fulfills the Transitivity law', () => {
+        Setoid.Transitivity(M, [maybeArbitrary(fc.integer()), maybeArbitrary(fc.string()), maybeArbitrary(fc.boolean())] as any[])
+      })
+      it('properly registers itself for use by the setoid module', () => {
+        registeredFine(isSetoid)
+      })
+    })
+    describe('Ord', () => {
+      it('fulfills the Reflexivity law', () => {
+        // we have to use values that are registered as Ord types
+        // since the default maybe compare does not take a Ord but dispatches to find one
+        Ord.Reflexivity(M, fc.oneof<any>(maybeArbitrary(fc.integer()), maybeArbitrary(fc.string()), maybeArbitrary(fc.boolean())))
+      })
+      it('fulfills the Antisymmetry law', () => {
+        // we pass in an array instead of doing oneof because oneof may generate comparisons of Maybe<A> vs Maybe<B> when used in fc.tuple
+        Ord.Antisymmetry(M, [maybeArbitrary(fc.integer()), maybeArbitrary(fc.string()), maybeArbitrary(fc.boolean())] as any[])
+      })
+      it('fulfills the Transitivity law', () => {
+        Ord.Transitivity(M, [maybeArbitrary(fc.integer()), maybeArbitrary(fc.string()), maybeArbitrary(fc.boolean())] as any[])
+      })
+      it('properly registers itself for use by the ord module', () => {
+        registeredFine(isOrd)
       })
     })
   })

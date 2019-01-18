@@ -1,5 +1,5 @@
-import { registerInstance, getInstance } from './register';
-import { Functor1 } from './Functor';
+import { registerInstance, getInstance } from '../register'
+import { Functor1 } from '../Functor'
 
 describe('register', () => {
   it('throws early if the module being registered does not have the URI property', () => {
