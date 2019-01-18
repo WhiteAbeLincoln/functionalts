@@ -12,6 +12,7 @@ import { Ord, compare as compareG, OrdTypes, ordNumber } from './structures/Ord'
 import { Ordering } from './structures/Ordering'
 import { zip } from './Iterable'
 import { Monad1 } from './structures/Monad'
+import { Semigroup } from './structures/Semigroup'
 
 declare global {
   interface Array<T> {
@@ -89,6 +90,12 @@ declare module './structures/Ord' {
   }
 }
 
+declare module './structures/Semigroup' {
+  interface RegisterSemigroup {
+    'functionalts/Array/Semigroup': Array<any>
+  }
+}
+
 let prototypeModified = URI_Tag in []
 const modifyPrototype = () => {
   if (!prototypeModified) {
@@ -100,20 +107,7 @@ const modifyPrototype = () => {
 export const map = <A, B>(fa: Array<A>, f: (a: A) => B): Array<B> =>
   fa.map(f)
 
-// TODO: Test the speed of this function (taken from fp-ts) vs other methods of concating arrays
-export const alt = <A>(xs: Array<A>, ys: Array<A>): Array<A> => {
-  const lenx = xs.length
-  const leny = ys.length
-  const r = Array(lenx + leny)
-  for (let i = 0; i < lenx; ++i) {
-    r[i] = xs[i]
-  }
-  for (let i = 0; i < leny; ++i) {
-    r[i + lenx] = ys[i]
-  }
-  return r
-}
-
+export const alt = <A>(xs: Array<A>, ys: Array<A>): Array<A> => xs.concat(ys)
 export { alt as concat }
 
 export const empty: ReadonlyArray<never> = []
@@ -184,8 +178,6 @@ export const getSetoid = <A>(S: Setoid<A>): Setoid<Array<A>> => ({
   equals: eq(S)
 })
 
-// export const compare = <A extends
-
 type Instances =
   & Functor1<URI>
   & Alt1<URI>
@@ -196,6 +188,7 @@ type Instances =
   & Monad1<URI>
   & Setoid<Array<SetoidTypes>>
   & Ord<Array<any>>
+  & Semigroup<Array<any>>
 
 export const Register = () => (
   modifyPrototype(),
@@ -209,5 +202,6 @@ export const Register = () => (
   , chain
   , equals: eq()
   , compare: comp()
+  , concat: alt
   })
 )

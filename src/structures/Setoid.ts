@@ -20,9 +20,7 @@ export const setoidStrict = { equals: strictEqual }
 export type DistributeTypes<T> =
     T extends Type<URIS, any> ? SetoidHKT<T[URI_Tag]>
   : T
-
 export type SetoidTypes = DistributeTypes<RegisterSetoid[keyof RegisterSetoid]>
-
 export interface SetoidHKT<T extends URIS> extends HKT<T, SetoidTypes> {}
 
 export const setoidString: Setoid<string> = setoidStrict
@@ -50,7 +48,7 @@ export const getRecordSetoid = <O extends Record<any, any>>(
     )
 })
 
-export const isSetoid = (f: any): f is Setoid<any> =>
+export const isSetoid = (f: any): f is Setoid<unknown> =>
   typeof f === 'object' && f !== null && typeof f['equals'] === 'function'
 
 export const dispatchSetoid = <F extends SetoidTypes>(v: F): Setoid<F> => {
@@ -65,11 +63,11 @@ export const dispatchSetoid = <F extends SetoidTypes>(v: F): Setoid<F> => {
 
 export function equals<A>(S: Setoid<A>): (x: A, y: A) => boolean
 export function equals<A extends SetoidTypes>(x: A, y: A): boolean
-export function equals(): boolean | (<A>(x: A, y: A) => boolean) {
+export function equals<A>(): boolean | ((x: A, y: A) => boolean) {
   switch (arguments.length) {
     case 1: {
-      const S: Setoid<any> = arguments[0]
-      return <A>(x: A, y: A) => S.equals(x, y)
+      const S: Setoid<A> = arguments[0]
+      return (x: A, y: A) => S.equals(x, y)
     }
     default: {
       const [x, y] = arguments

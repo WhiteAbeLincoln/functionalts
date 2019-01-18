@@ -11,6 +11,7 @@ import { equals as equalsG, SetoidTypes, Setoid } from './structures/Setoid'
 import { Ord, compare as compareG, OrdTypes } from './structures/Ord'
 import { Ordering } from './structures/Ordering'
 import { Monad1 } from './structures/Monad'
+import { Semigroup } from './structures/Semigroup'
 
 export const URI = 'functionalts/Maybe/URI'
 export type URI = typeof URI
@@ -191,6 +192,14 @@ export const getOrd = <A>(O: Ord<A>): Ord<Maybe<A>> => ({
   compare: comp(O)
 })
 
+// our default concat is just alt, because without a TypeRep
+// we cannot concat the inner values
+export { alt as concat }
+
+export const getApplySemigroup = <A>(S: Semigroup<A>): Semigroup<Maybe<A>> => ({
+  concat: (x, y) => isJust(x) && isJust(y) ? just(S.concat(x.value, y.value)) : nothing
+})
+
 type Instances =
   & Functor1<URI>
   & Alt1<URI>
@@ -201,6 +210,7 @@ type Instances =
   & Monad1<URI>
   & Setoid<Maybe<SetoidTypes>>
   & Ord<Maybe<any>>
+  & Semigroup<Maybe<any>>
 
 // This is how you register your object at the value-level
 export const Register = () =>
@@ -214,4 +224,7 @@ export const Register = () =>
   , chain
   , equals: eq()
   , compare: comp()
+  // our default concat is just alt, because without a TypeRep
+  // we cannot concat the inner values
+  , concat: alt
   })
