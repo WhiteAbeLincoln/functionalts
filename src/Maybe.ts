@@ -201,6 +201,11 @@ export const getApplySemigroup = <A>(S: Semigroup<A>): Semigroup<Maybe<A>> => ({
   concat: (x, y) => isJust(x) && isJust(y) ? just(S.concat(x.value, y.value)) : nothing
 })
 
+export const getApplyMonoid = <A>(M: Monoid<A>): Monoid<Maybe<A>> => ({
+  ...getApplySemigroup(M),
+  empty: just(M.empty)
+})
+
 type Instances =
   & Functor1<URI>
   & Alt1<URI>

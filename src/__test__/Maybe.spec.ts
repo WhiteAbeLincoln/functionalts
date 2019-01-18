@@ -25,10 +25,10 @@ import { isApply } from '../structures/Apply'
 import { isAlt } from '../structures/Alt'
 import { isFunctor } from '../structures/Functor'
 import { Predicate } from '../util/types'
-import { isSemigroup } from '../structures/Semigroup'
-import { isMonoid } from '../structures/Monoid'
-import { isSetoid } from '../structures/Setoid'
-import { isOrd } from '../structures/Ord'
+import { isSemigroup, semigroupSum } from '../structures/Semigroup'
+import { isMonoid, monoidSum } from '../structures/Monoid'
+import { isSetoid, setoidNumber, setoidBoolean, setoidString } from '../structures/Setoid'
+import { isOrd, ordNumber, ordBoolean, ordString } from '../structures/Ord'
 // Note: Mocking fails when build directory exists
 // make sure to clean before
 jest.mock('../structures/register')
@@ -170,6 +170,23 @@ describe('Maybe', () => {
       it('properly registers itself for use by the semigroup module', () => {
         registeredFine(isSemigroup)
       })
+      describe('getApplySemigroup', () => {
+        it('fulfills the Associativity law', () => {
+          Semigroup.Assoiciativity(M.getApplySemigroup(semigroupSum), maybeArbitrary(fc.integer()))
+        })
+        it('concats the inner value if both maybes are justs', () => {
+          const concat = jest.fn()
+          const S = M.getApplySemigroup({ concat })
+
+          S.concat(M.just(1), M.just(2))
+          S.concat(nothing, M.just(2))
+          S.concat(M.just(1), nothing)
+          S.concat(nothing, nothing)
+
+          expect(concat).toHaveBeenCalledTimes(1)
+          expect(concat).toHaveBeenCalledWith(1, 2)
+        })
+      })
     })
     describe('Monoid', () => {
       it('fulfills the Left Identity law', () => {
@@ -180,6 +197,17 @@ describe('Maybe', () => {
       })
       it('properly registers itself for use by the monoid module', () => {
         registeredFine(isMonoid)
+      })
+      describe('getApplyMonoid', () => {
+        it('fulfills the Left Identity law', () => {
+          Monoid.LeftIdentity(M.getApplyMonoid(monoidSum), maybeArbitrary(fc.integer()))
+        })
+        it('fulfills the Right Identity law', () => {
+          Monoid.RightIdentity(M.getApplyMonoid(monoidSum), maybeArbitrary(fc.integer()))
+        })
+        it('returns a monoid (Monoid m => Monoid Maybe m) where empty is Just(m.empty)', () => {
+          expect(M.getApplyMonoid(monoidSum).empty).toEqual(just(monoidSum.empty))
+        })
       })
     })
     describe('Setoid', () => {
@@ -198,6 +226,20 @@ describe('Maybe', () => {
       it('properly registers itself for use by the setoid module', () => {
         registeredFine(isSetoid)
       })
+      describe('getSetoid', () => {
+        it('fulfills the Reflexivity law', () => {
+          const S = M.getSetoid(setoidNumber)
+          Setoid.Reflexivity(S, maybeArbitrary(fc.integer()))
+        })
+        it('fulfills the Symmetry law', () => {
+          const S = M.getSetoid(setoidBoolean)
+          Setoid.Symmetry(S, [maybeArbitrary(fc.boolean())])
+        })
+        it('fulfills the Transitivity law', () => {
+          const S = M.getSetoid(M.getSetoid(setoidString))
+          Setoid.Transitivity(S, [maybeArbitrary(maybeArbitrary(fc.string()))])
+        })
+      })
     })
     describe('Ord', () => {
       it('fulfills the Reflexivity law', () => {
@@ -214,6 +256,20 @@ describe('Maybe', () => {
       })
       it('properly registers itself for use by the ord module', () => {
         registeredFine(isOrd)
+      })
+      describe('getOrd', () => {
+        it('fulfills the Reflexivity law', () => {
+          const O = M.getOrd(ordNumber)
+          Ord.Reflexivity(O, maybeArbitrary(fc.integer()))
+        })
+        it('fulfills the Antisymmetry law', () => {
+          const O = M.getOrd(ordBoolean)
+          Ord.Antisymmetry(O, [maybeArbitrary(fc.boolean())])
+        })
+        it('fulfills the Transitivity law', () => {
+          const O = M.getOrd(M.getOrd(ordString))
+          Ord.Transitivity(O, [maybeArbitrary(maybeArbitrary(fc.string()))])
+        })
       })
     })
   })
