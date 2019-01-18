@@ -1,5 +1,5 @@
-import { Setoid, setoidStrict } from './Setoid'
-import { Semigroup } from './Semigroup';
+import { Setoid } from './Setoid'
+import { Semigroup } from './Semigroup'
 
 export type Ordering = -1 | 0 | 1
 
@@ -16,5 +16,5 @@ export const invert = (O: Ordering): Ordering => {
   }
 }
 
-export const setoidOrdering: Setoid<Ordering> = setoidStrict
+export const setoidOrdering: Setoid<Ordering> = { equals: (x, y) => x === y }
 export const semigroupOrdering: Semigroup<Ordering> = { concat: (x, y) => x !== 0 ? x : y }

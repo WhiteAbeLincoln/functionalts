@@ -10,7 +10,8 @@
     "clean": "rm -r build",
     "cov": "run-s cov:html && xdg-open coverage/index.html",
     "cov:html": "jest --coverage --coverageReporters='html'",
-    "cov:check": "jest --coverage"
+    "cov:check": "jest --coverage",
+    "check-circular": "madge --circular --extensions ts src"
   },
   "keywords": [
     "functional",
@@ -25,6 +26,7 @@
     "@types/jest": "^23.3.12",
     "fast-check": "^1.10.0",
     "jest": "^23.6.0",
+    "madge": "^3.4.3",
     "npm-run-all": "^4.1.5",
     "ts-jest": "^23.10.5",
     "typescript": "^3.2.2"

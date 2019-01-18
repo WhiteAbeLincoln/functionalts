@@ -1,5 +1,4 @@
 import { Fn, Curried2 } from './types'
-import { greaterThan, ordNumber, lessThan } from '../structures/Ord'
 
 // Combinators
 /** the I combinator, identity */
@@ -46,5 +45,5 @@ export const fst = <Ts extends [any, ...any[]]>([v]: Ts) => v
 export const snd = <Ts extends [any, any, ...any[]]>([,v]: Ts) => v
 export const property = <T, K extends keyof T>(k: K) => (o: T) => o[k]
 
-export const gt = curry2(greaterThan(ordNumber))
-export const lt = curry2(lessThan(ordNumber))
+export const gt = (x: number) => (y: number) => x > y
+export const lt = (x: number) => (y: number) => x < y
