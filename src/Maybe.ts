@@ -138,7 +138,7 @@ export const fromPredicate =
 export const tryCatch = <A>(f: Lazy<A>) => {
   try {
     return just(f())
-  } catch {
+  } catch (_) {
     return nothing
   }
 }
