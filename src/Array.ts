@@ -134,7 +134,7 @@ const eq =
     (xs: Array<A>, ys: Array<A>): boolean =>
       xs.length === ys.length && xs.every((x, i) => S.equals(x, ys[i]))
 
-export const comp =
+const comp =
    <A>(O: Pick<Ord<A>, 'compare'> = { compare: compareG }) =>
       (xs: Array<A>, ys: Array<A>): Ordering => {
         const xLen = xs.length
@@ -151,32 +151,37 @@ export const comp =
 
 export function equals<A>(S: Setoid<A>): (xs: Array<A>, ys: Array<A>) => boolean
 export function equals<A extends SetoidTypes>(xs: Array<A>, ys: Array<A>): boolean
-export function equals(): boolean | (<A>(x: Array<A>, y: Array<A>) => boolean) {
+export function equals<A>(): boolean | ((x: Array<A>, y: Array<A>) => boolean) {
   switch (arguments.length) {
     case 1:
-      const S: Setoid<any> = arguments[0]
+      const S: Setoid<A> = arguments[0]
       return eq(S)
     default:
       const [xs, ys] = arguments
-      return eq<any>()(xs, ys)
+      return eq<A>()(xs, ys)
   }
 }
 
 export function compare<A>(S: Ord<A>): (xs: Array<A>, ys: Array<A>) => Ordering
 export function compare<A extends OrdTypes>(xs: Array<A>, ys: Array<A>): Ordering
-export function compare(): Ordering | (<A>(x: Array<A>, y: Array<A>) => Ordering) {
+export function compare<A>(): Ordering | ((x: Array<A>, y: Array<A>) => Ordering) {
   switch (arguments.length) {
     case 1:
-      const S: Ord<any> = arguments[0]
+      const S: Ord<A> = arguments[0]
       return comp(S)
     default:
       const [xs, ys] = arguments
-      return comp<any>()(xs, ys)
+      return comp<A>()(xs, ys)
   }
 }
 
 export const getSetoid = <A>(S: Setoid<A>): Setoid<Array<A>> => ({
   equals: eq(S)
+})
+
+export const getOrd = <A>(O: Ord<A>): Ord<Array<A>> => ({
+  ...getSetoid(O),
+  compare: comp(O)
 })
 
 type Instances =

@@ -146,13 +146,13 @@ export const tryCatch = <A>(f: Lazy<A>) => {
 export const fromNullable = <A>(a: A | null | undefined): Maybe<A> =>
   a == null ? nothing : just(a)
 
-export const eq = <A>(S: Setoid<A> = { equals: equalsG }) =>
+const eq = <A>(S: Setoid<A> = { equals: equalsG }) =>
   (x: Maybe<A>, y: Maybe<A>): boolean =>
       isNothing(x) ? isNothing(y)
     : isNothing(y) ? false
     : S.equals(x.value, y.value)
 
-export const comp =
+const comp =
    <A>(O: Pick<Ord<A>, 'compare'> = { compare: compareG }) =>
       (x: Maybe<A>, y: Maybe<A>): Ordering =>
           isJust(x) ? (isJust(y) ? O.compare(x.value, y.value) : 1)

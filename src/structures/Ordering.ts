@@ -1,6 +1,3 @@
-import { Setoid } from './Setoid'
-import { Semigroup } from './Semigroup'
-
 export type Ordering = -1 | 0 | 1
 
 export const sign = (n: number): Ordering => n <= -1 ? -1 : n >= 1 ? 1 : 0
@@ -15,6 +12,3 @@ export const invert = (O: Ordering): Ordering => {
       return 0
   }
 }
-
-export const setoidOrdering: Setoid<Ordering> = { equals: (x, y) => x === y }
-export const semigroupOrdering: Semigroup<Ordering> = { concat: (x, y) => x !== 0 ? x : y }

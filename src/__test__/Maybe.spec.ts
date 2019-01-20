@@ -27,8 +27,13 @@ import { isFunctor } from '../structures/Functor'
 import { Predicate } from '../util/types'
 import { isSemigroup, semigroupSum } from '../structures/Semigroup'
 import { isMonoid, monoidSum } from '../structures/Monoid'
-import { isSetoid, setoidNumber, setoidBoolean, setoidString } from '../structures/Setoid'
-import { isOrd, ordNumber, ordBoolean, ordString } from '../structures/Ord'
+import {
+  isSetoid, setoidNumber, setoidBoolean,
+  setoidString, setoidSymbol
+} from '../structures/Setoid'
+import {
+  isOrd, ordNumber, ordBoolean, ordString
+} from '../structures/Ord'
 // Note: Mocking fails when build directory exists
 // make sure to clean before
 jest.mock('../structures/register')
@@ -240,6 +245,14 @@ describe('Maybe', () => {
           Setoid.Transitivity(S, [maybeArbitrary(maybeArbitrary(fc.string()))])
         })
       })
+      describe('equals', () => {
+        it('allows passing in a Setoid typerep', () => {
+          const s = M.equals(setoidSymbol)
+          expect(typeof s).toBe('function')
+          expect(s(just(Symbol('hi')), just(Symbol('hey')))).toBe(false)
+          expect(s(just(Symbol.iterator), just(Symbol.iterator))).toBe(true)
+        })
+      })
     })
     describe('Ord', () => {
       it('fulfills the Reflexivity law', () => {
@@ -269,6 +282,13 @@ describe('Maybe', () => {
         it('fulfills the Transitivity law', () => {
           const O = M.getOrd(M.getOrd(ordString))
           Ord.Transitivity(O, [maybeArbitrary(maybeArbitrary(fc.string()))])
+        })
+      })
+      describe('compare', () => {
+        it('allows passing in an Ord typerep', () => {
+          const s = M.compare(ordNumber)
+          expect(typeof s).toBe('function')
+          expect(s(just(1), just(2))).toBe(-1)
         })
       })
     })

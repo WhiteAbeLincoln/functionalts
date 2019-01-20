@@ -41,7 +41,9 @@ export const curry2 = <A, B, R>(fn: Fn<[A, B], R>): Curried2<A, B, R> =>
   (a: A) => (b: B) => fn(a, b)
 
 export const tuple = <Xs extends any[]>(...xs: Xs) => xs
+/* istanbul ignore next: trivial */
 export const fst = <Ts extends [any, ...any[]]>([v]: Ts) => v
+/* istanbul ignore next: trivial */
 export const snd = <Ts extends [any, any, ...any[]]>([,v]: Ts) => v
 export const property = <T, K extends keyof T>(k: K) => (o: T) => o[k]
 

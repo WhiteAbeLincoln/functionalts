@@ -26,8 +26,13 @@ import { isApplicative } from '../structures/Applicative'
 import { isAlternative } from '../structures/Alternative'
 import { isSemigroup } from '../structures/Semigroup'
 import { isMonoid } from '../structures/Monoid'
-import { isSetoid } from '../structures/Setoid'
-import { isOrd } from '../structures/Ord'
+import {
+  isSetoid, setoidNumber, setoidBoolean,
+  setoidString, setoidSymbol
+} from '../structures/Setoid'
+import {
+  isOrd, ordNumber, ordString, ordBoolean
+} from '../structures/Ord'
 jest.mock('../structures/register')
 
 const arrayArbitrary = <A = any>(v: fc.Arbitrary<A> = fc.anything()) => fc.array(v)
@@ -190,6 +195,28 @@ describe('Maybe', () => {
       it('properly registers itself for use by the setoid module', () => {
         registeredFine(isSetoid)
       })
+      describe('getSetoid', () => {
+        it('fulfills the Reflexivity law', () => {
+          const S = M.getSetoid(setoidNumber)
+          Setoid.Reflexivity(S, arrayArbitrary(fc.integer()))
+        })
+        it('fulfills the Symmetry law', () => {
+          const S = M.getSetoid(setoidBoolean)
+          Setoid.Symmetry(S, [arrayArbitrary(fc.boolean())])
+        })
+        it('fulfills the Transitivity law', () => {
+          const S = M.getSetoid(M.getSetoid(setoidString))
+          Setoid.Transitivity(S, [arrayArbitrary(arrayArbitrary(fc.string()))])
+        })
+      })
+      describe('equals', () => {
+        it('allows passing in a Setoid typerep', () => {
+          const s = M.equals(setoidSymbol)
+          expect(typeof s).toBe('function')
+          expect(s([Symbol('hi')], [Symbol('hey')])).toBe(false)
+          expect(s([Symbol.iterator], [Symbol.iterator])).toBe(true)
+        })
+      })
     })
     describe('Ord', () => {
       it('fulfills the Reflexivity law', () => {
@@ -206,6 +233,27 @@ describe('Maybe', () => {
       })
       it('properly registers itself for use by the ord module', () => {
         registeredFine(isOrd)
+      })
+      describe('getOrd', () => {
+        it('fulfills the Reflexivity law', () => {
+          const O = M.getOrd(ordNumber)
+          Ord.Reflexivity(O, arrayArbitrary(fc.integer()))
+        })
+        it('fulfills the Antisymmetry law', () => {
+          const O = M.getOrd(ordBoolean)
+          Ord.Antisymmetry(O, [arrayArbitrary(fc.boolean())])
+        })
+        it('fulfills the Transitivity law', () => {
+          const O = M.getOrd(M.getOrd(ordString))
+          Ord.Transitivity(O, [arrayArbitrary(arrayArbitrary(fc.string()))])
+        })
+      })
+      describe('compare', () => {
+        it('allows passing in an Ord typerep', () => {
+          const s = M.compare(ordString)
+          expect(typeof s).toBe('function')
+          expect(s(['hi'], ['hey'])).toBe(1)
+        })
       })
     })
   })

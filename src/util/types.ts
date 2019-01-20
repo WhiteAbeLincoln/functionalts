@@ -17,3 +17,5 @@ export type Curried2<A, B, R> = Fn<[A], Fn<[B], R>>
 export type Curried3<A, B, C, R> = Fn<[A], Fn<[B], Fn<[C], R>>>
 export type Curried4<A, B, C, D, R> = Fn<[A], Fn<[B], Fn<[C], Fn<[D], R>>>>
 export type Curried5<A, B, C, D, E, R> = Fn<[A], Fn<[B], Fn<[C], Fn<[D], Fn<[E], R>>>>>
+
+export type Shift<Ts extends any[]> = Fn<Ts, any> extends (x: any, ...y: infer Us) => any ? Us : never

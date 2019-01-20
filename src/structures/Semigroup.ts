@@ -2,6 +2,7 @@ import { Type, URIS, URI_Tag, HKT, isHKT } from './HKT'
 import { getTypeclass, iterateObject } from '../util/util'
 import { I } from '../util/functional'
 import { Fn } from '../util/types'
+import { Ordering } from './Ordering'
 
 export interface RegisterSemigroup {
   'functionalts/Semigroup/number': number
@@ -19,20 +20,28 @@ export type DistributeTypes<T> =
 export type SemigroupTypes = DistributeTypes<RegisterSemigroup[keyof RegisterSemigroup]>
 export interface SemigroupHKT<T extends URIS> extends HKT<T, SemigroupTypes> {}
 
+/* istanbul ignore next: trivial */
 export const semigroupAll: Semigroup<boolean> = { concat: (x, y) => x && y }
+/* istanbul ignore next: trivial */
 export const semigroupAny: Semigroup<boolean> = { concat: (x, y) => x || y }
+/* istanbul ignore next: trivial */
 export const semigroupSum: Semigroup<number> = { concat: (x, y) => x + y }
+/* istanbul ignore next: trivial */
 export const semigroupProduct: Semigroup<number> = { concat: (x, y) => x * y }
+/* istanbul ignore next: trivial */
 export const semigroupString: Semigroup<string> = { concat: (x, y) => x + y }
+/* istanbul ignore next: trivial */
 export const semigroupVoid: Semigroup<void> = { concat: () => undefined }
+export const semigroupOrdering: Semigroup<Ordering> = { concat: (x, y) => x !== 0 ? x : y }
 
 type GetSemigroupType<T> = T extends Semigroup<infer A> ? A : never
 
 export const getProductSemigroup =
   <Ss extends Array<Semigroup<any>>>(...semigroups: Ss): Semigroup<{ [k in keyof Ss]: GetSemigroupType<Ss[k]> }> => ({
     concat: (xs, ys) => {
-      if (xs.length !== ys.length || xs.length !== semigroups.length)
-        throw new Error('Cannot concat two products having different lengths')
+      // we don't need this test because the types shouldn't allow it to occur
+      // if (xs.length !== ys.length || xs.length !== semigroups.length)
+      //   throw new Error('Cannot concat two products having different lengths')
       return xs.map((x, i) => semigroups[i].concat(x, ys[i])) as { [k in keyof Ss]: GetSemigroupType<Ss[k]> }
     }
   })

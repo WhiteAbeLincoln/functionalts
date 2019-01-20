@@ -1,6 +1,7 @@
 import { iterateObject, getTypeclass } from '../util/util'
 import { every } from '../Iterable'
 import { Type, URIS, HKT, isHKT, URI_Tag } from './HKT'
+import { Ordering } from './Ordering'
 
 // must be exported or else SetoidTypes cannot be extended
 export interface RegisterSetoid {
@@ -14,8 +15,8 @@ export interface Setoid<A> {
   readonly equals: (x: A, y: A) => boolean
 }
 
-export const strictEqual = <A>(x: A, y: A): boolean => x === y
-export const setoidStrict = { equals: strictEqual }
+const strictEqual = <A>(x: A, y: A): boolean => x === y
+const setoidStrict = { equals: strictEqual }
 
 export type DistributeTypes<T> =
     T extends Type<URIS, any> ? SetoidHKT<T[URI_Tag]>
@@ -23,10 +24,16 @@ export type DistributeTypes<T> =
 export type SetoidTypes = DistributeTypes<RegisterSetoid[keyof RegisterSetoid]>
 export interface SetoidHKT<T extends URIS> extends HKT<T, SetoidTypes> {}
 
+/* istanbul ignore next: trivial */
 export const setoidString: Setoid<string> = setoidStrict
+/* istanbul ignore next: trivial */
 export const setoidNumber: Setoid<number> = setoidStrict
+/* istanbul ignore next: trivial */
 export const setoidBoolean: Setoid<boolean> = setoidStrict
+/* istanbul ignore next: trivial */
 export const setoidSymbol: Setoid<symbol> = setoidStrict
+/* istanbul ignore next: trivial */
+export const setoidOrdering: Setoid<Ordering> = setoidStrict
 
 type GetSetoidType<T> = T extends Setoid<infer A> ? A : never
 
@@ -49,6 +56,9 @@ export const getRecordSetoid = <O extends Record<any, any>>(
 })
 
 export const isSetoid = (f: any): f is Setoid<unknown> =>
+  // technically we can test function arity with f.length, but I'm not sure if we should
+  // it  would fail on variadic functions or functions
+  // with no declared parameters (just using arguments)
   typeof f === 'object' && f !== null && typeof f['equals'] === 'function'
 
 export const dispatchSetoid = <F extends SetoidTypes>(v: F): Setoid<F> => {

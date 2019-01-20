@@ -39,6 +39,7 @@
       "!**/node_modules/**",
       "!**/*.helper.*",
       "!**/*.spec.*"
-    ]
+    ],
+    "restoreMocks": true
   }
 }

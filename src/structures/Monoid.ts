@@ -26,31 +26,37 @@ export interface MonoidHKT<T extends URIS> extends HKT<T, MonoidTypes> {}
 
 type GetMonoidType<T> = T extends Monoid<infer A> ? A : never
 
+/* istanbul ignore next: trivial */
 export const monoidAll: Monoid<boolean> = ({
   ...semigroupAll,
   empty: true
 })
 
+/* istanbul ignore next: trivial */
 export const monoidAny: Monoid<boolean> = ({
   ...semigroupAny,
   empty: false
 })
 
+/* istanbul ignore next: trivial */
 export const monoidSum: Monoid<number> = ({
   ...semigroupSum,
   empty: 0
 })
 
+/* istanbul ignore next: trivial */
 export const monoidProduct: Monoid<number> = ({
   ...semigroupProduct,
   empty: 1
 })
 
+/* istanbul ignore next: trivial */
 export const monoidString: Monoid<string> = ({
   ...semigroupString,
   empty: ''
 })
 
+/* istanbul ignore next: trivial */
 export const monoidVoid: Monoid<void> = ({
   ...semigroupVoid,
   empty: undefined
@@ -88,7 +94,7 @@ export const dispatchMonoid = <F extends MonoidTypes>(v: F): Monoid<F> => {
   if (typeof v === 'string') return monoidString as unknown as Monoid<F>
   // There really isn't a way to ensure this stays consistent with dispatchSemigroup behavior
   if (typeof v === 'number') return monoidSum as unknown as Monoid<F>
-  if (typeof v === 'boolean') return semigroupAll as unknown as Monoid<F>
+  if (typeof v === 'boolean') return monoidAll as unknown as Monoid<F>
   if (isHKT(v)) return getTypeclass(isMonoid, 'Monoid')(v) as Monoid<F>
   throw new Error(`Monoid for value ${v} is not registered`)
 }
